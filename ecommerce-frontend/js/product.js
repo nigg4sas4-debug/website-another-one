@@ -18,6 +18,7 @@
     const addToCartBtn = document.getElementById("add-to-cart");
     const buyNowBtn = document.getElementById("buy-now");
     const relatedGrid = document.getElementById("related-grid");
+    const basePriceRange = window.getPriceRange?.(product) || "$0.00";
 
     if (!product || !variationSelect) return;
 
@@ -25,6 +26,7 @@
     descEl.textContent = product.description;
     ratingEl.textContent = `★ ${product.rating}`;
     categoryEl.textContent = product.category;
+    priceEl.textContent = basePriceRange;
 
     product.variations.forEach((variation, index) => {
         const option = document.createElement("option");
@@ -37,25 +39,31 @@
     function renderGallery(variation) {
         if (!galleryEl) return;
         galleryEl.innerHTML = variation.gallery
-            .map((color, idx) => `<div class="tile" style="background-image: linear-gradient(135deg, ${color}, ${variation.gallery[idx + 1] || color});"></div>`)
+            .map((entry, idx) => {
+                const isImage = String(entry).startsWith("data:image") || String(entry).startsWith("http");
+                const background = isImage
+                    ? `url('${entry}')`
+                    : `linear-gradient(135deg, ${entry}, ${variation.gallery[idx + 1] || entry})`;
+                return `<div class="tile" style="background-image: ${background};"></div>`;
+            })
             .join("");
     }
 
-    function updateSizes() {
+    function updateSizes(showSelectedPrice = false) {
         const selectedVariation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
         sizeSelect.innerHTML = selectedVariation.sizes
             .map((size) => `<option value="${size.label}">${size.label}</option>`)
             .join("");
         renderGallery(selectedVariation);
-        updateStock();
+        updateStock(showSelectedPrice);
     }
 
-    function updateStock() {
+    function updateStock(showSelectedPrice = true) {
         const variation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
         const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes[0];
         if (!size) return;
         stockCount.textContent = `${size.stock} in stock`;
-        priceEl.textContent = `$${size.price.toFixed(2)}`;
+        priceEl.textContent = showSelectedPrice ? `$${size.price.toFixed(2)}` : basePriceRange;
         const out = size.stock === 0;
         stockAlert.hidden = !out;
         addToCartBtn.disabled = out;
@@ -90,12 +98,12 @@
         }
     }
 
-    variationSelect.addEventListener("change", updateSizes);
-    sizeSelect.addEventListener("change", updateStock);
+    variationSelect.addEventListener("change", () => updateSizes(true));
+    sizeSelect.addEventListener("change", () => updateStock(true));
     addToCartBtn.addEventListener("click", () => addToCart(false));
     buyNowBtn.addEventListener("click", () => addToCart(true));
 
-    updateSizes();
+    updateSizes(false);
 
     if (relatedGrid) {
         const related = products.filter((p) => p.id !== product.id).slice(0, 3);

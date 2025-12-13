@@ -235,13 +235,20 @@ function saveProducts(list) {
     localStorage.setItem("products", JSON.stringify(list));
 }
 
+function normalizeOrders(list) {
+    return list.map((order) => ({
+        cancellationRequest: order.cancellationRequest || null,
+        ...order,
+    }));
+}
+
 function loadOrders() {
     const saved = localStorage.getItem("orders");
     if (saved) {
-        return JSON.parse(saved);
+        return normalizeOrders(JSON.parse(saved));
     }
     localStorage.setItem("orders", JSON.stringify(defaultOrders));
-    return JSON.parse(JSON.stringify(defaultOrders));
+    return normalizeOrders(JSON.parse(JSON.stringify(defaultOrders)));
 }
 
 function saveOrders(list) {

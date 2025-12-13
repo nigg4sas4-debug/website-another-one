@@ -50,6 +50,21 @@
         </div>
     </main>
 
+    <div class="modal-overlay" id="cancel-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cancel-title">
+            <header>
+                <h3 id="cancel-title">Submit cancellation</h3>
+                <button type="button" class="link" data-close-modal>&times;</button>
+            </header>
+            <p class="muted">Tell us why you need to cancel. The admin team will review the request.</p>
+            <form id="cancel-form" class="stacked">
+                <input type="hidden" name="orderId" id="cancel-order-id">
+                <label>Reason<textarea id="cancel-reason" name="reason" rows="3" placeholder="Changed my mind, duplicate order..." required></textarea></label>
+                <button class="btn" type="submit">Send request</button>
+            </form>
+        </div>
+    </div>
+
         <!-- Begin shared footer component -->
         <footer class="footer">
             <div class="footer-container">
