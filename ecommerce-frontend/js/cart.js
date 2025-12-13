@@ -92,6 +92,7 @@
             zip: data.get("zip") || "",
             items: cart,
             status: "Pending",
+            cancellationRequest: null,
             total,
             eta: "Aug 28, 2024",
         };
