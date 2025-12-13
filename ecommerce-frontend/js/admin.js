@@ -4,11 +4,15 @@
     const orderList = document.getElementById("order-list");
     const cancellationList = document.getElementById("cancellation-requests");
 
+    const inventoryGrid = document.getElementById("inventory-grid");
+
     async function loadProducts() {
-        if (!productList) return;
+        if (!productList && !inventoryGrid) return;
+        let products = [];
         try {
-            const products = await apiClient.getProducts();
-            productList.innerHTML = products
+            products = await apiClient.getProducts();
+            if (productList) {
+                productList.innerHTML = products
                 .map(
                     (product) => `
                 <article class="product-row">
@@ -22,8 +26,34 @@
             `
                 )
                 .join("");
+            }
         } catch (err) {
-            productList.innerHTML = `<p class="muted">Unable to load products: ${err.message}</p>`;
+            if (productList) {
+                productList.innerHTML = `<p class="muted">Unable to load products: ${err.message}</p>`;
+            } else {
+                console.error('Unable to load products', err);
+            }
+        }
+        // populate inventory grid if present
+        if (inventoryGrid) {
+            try {
+                inventoryGrid.innerHTML = products
+                    .map((product) => {
+                        const totalStock = (product.variations || []).flatMap(v => v.sizes || []).reduce((s, sz) => s + (Number(sz.stock) || 0), 0);
+                        return `
+                            <article class="inventory-row">
+                                <div>
+                                    <strong>${product.name}</strong>
+                                    <p class="muted">${product.variations?.[0]?.sizes?.[0]?.label || "Default"}</p>
+                                </div>
+                                <div class="pill">Stock: ${totalStock}</div>
+                            </article>
+                        `;
+                    })
+                    .join("");
+            } catch (e) {
+                inventoryGrid.innerHTML = `<p class="muted">Unable to load inventory: ${e.message}</p>`;
+            }
         }
     }
 
@@ -86,4 +116,38 @@
     });
 
     await Promise.all([loadProducts(), loadOrders()]);
+
+    // Handle product creation form
+    const productForm = document.getElementById("product-form");
+    productForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!window.apiClient) return alert("API unavailable");
+        const form = e.currentTarget;
+        const fd = new FormData(form);
+        const name = String(fd.get("name") || "").trim();
+        const description = String(fd.get("description") || "").trim();
+        const price = Number(fd.get("price") || 0);
+
+        // Compute stock from sizes inputs if present
+        let stock = 0;
+        document.querySelectorAll('#variation-list input[name="sizes"]').forEach((el) => {
+            const v = el.value || ""; // format: S:10:50,M:6:52
+                v.split(",").forEach((part) => {
+                    const parts = part.split(":"); // Fixed the syntax error here
+                if (parts.length >= 2) {
+                    const qty = Number(parts[1]) || 0;
+                    stock += qty;
+                }
+            });
+        });
+
+        try {
+            await apiClient.createProduct({ name, description, price, stock });
+            alert('Product created');
+            loadProducts();
+            form.reset();
+        } catch (err) {
+            alert(`Unable to create product: ${err.message}`);
+        }
+    });
 })();

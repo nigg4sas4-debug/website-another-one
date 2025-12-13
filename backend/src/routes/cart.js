@@ -14,7 +14,7 @@ router.get(
       where: { userId: req.user.id },
       include: { product: true },
     });
-    res.json(cart);
+    res.json({ items: cart });
   })
 );
 
@@ -42,7 +42,9 @@ router.post(
       include: { product: true },
     });
 
-    res.status(201).json(item);
+    // return full cart to match frontend shape { items: [...] }
+    const cart = await prisma.cartItem.findMany({ where: { userId: req.user.id }, include: { product: true } });
+    res.status(201).json({ items: cart });
   })
 );
 
@@ -65,7 +67,8 @@ router.patch(
       data: { quantity },
       include: { product: true },
     });
-    res.json(updated);
+    const cart = await prisma.cartItem.findMany({ where: { userId: req.user.id }, include: { product: true } });
+    res.json({ items: cart });
   })
 );
 
@@ -79,7 +82,8 @@ router.delete(
     }
 
     await prisma.cartItem.delete({ where: { id } });
-    res.status(204).send();
+    const cart = await prisma.cartItem.findMany({ where: { userId: req.user.id }, include: { product: true } });
+    res.json({ items: cart });
   })
 );
 
