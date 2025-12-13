@@ -22,6 +22,9 @@ This project now contains a static frontend for an e-commerce experience **and a
    > registry. The repo already contains `package.json`/`package-lock.json`; just rerun `npm install` on a network that can
    > reach npm (no extra packages are needed beyond what's declared).
 3. Generate the Prisma client and run migrations to create `prisma/dev.db` (schema uses SQLite-friendly types—no enums/decimals/json):
+
+
+3. Generate the Prisma client and run migrations to create `prisma/dev.db`:
    ```bash
    npx prisma migrate dev --name init
    npx prisma db seed
