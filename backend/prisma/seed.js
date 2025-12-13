@@ -1,13 +1,5 @@
 const bcrypt = require("bcryptjs");
-const Prisma = require("@prisma/client");
-
-const prisma = new Prisma.PrismaClient();
-
 const { PrismaClient } = require("@prisma/client");
-
-
-const { PrismaClient, UserRole } = require("@prisma/client");
- 
 
 const prisma = new PrismaClient();
 
@@ -21,9 +13,6 @@ async function main() {
       email: "admin@example.com",
       passwordHash,
       role: "ADMIN",
-
-
-      role: UserRole.ADMIN,
     },
   });
 
@@ -52,11 +41,16 @@ async function main() {
   ];
 
   for (const product of products) {
-    await prisma.product.upsert({
-      where: { name: product.name },
-      update: product,
-      create: product,
-    });
+    try {
+      await prisma.product.create({ data: product });
+    } catch (e) {
+      if (e.code === "P2002") {
+        await prisma.product.update({
+          where: { name: product.name },
+          data: product,
+        });
+      }
+    }
   }
 }
 
