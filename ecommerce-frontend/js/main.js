@@ -20,14 +20,28 @@
 
     const featuredGrid = document.getElementById("featured-grid");
     const categoryGrid = document.getElementById("category-grid");
+    const catalogGrid = document.getElementById("catalog-grid");
 
     async function hydrateProducts() {
         if (!window.apiClient) return;
+        console.log('hydrateProducts: fetching products');
         try {
             const products = await apiClient.getProducts();
+            console.log('hydrateProducts: received products', products?.length);
             if (featuredGrid) {
                 const featured = products.slice(0, 6);
                 featuredGrid.innerHTML = featured.map((product) => renderProductCard(product)).join("");
+            }
+            if (catalogGrid) {
+                // support optional search term
+                const term = sessionStorage.getItem("searchTerm");
+                let shown = products;
+                if (term) {
+                    const t = term.toLowerCase();
+                    shown = products.filter((p) => (p.name || "").toLowerCase().includes(t) || (p.description || "").toLowerCase().includes(t));
+                    sessionStorage.removeItem("searchTerm");
+                }
+                catalogGrid.innerHTML = shown.map((product) => renderProductCard(product)).join("");
             }
             if (categoryGrid) {
                 const categories = [...new Set(products.map((p) => p.category || "Essentials"))];
@@ -100,6 +114,7 @@ window.getPriceRange = getPriceRange;
 
 function renderProductCard(product) {
     const firstVariation = product.variations[0];
+    console.log('renderProductCard image for', product.id, firstVariation?.image);
     const displayPrice = getPriceRange(product);
     return `
         <a class="product-card" href="./product-detail.html?id=${product.id}">

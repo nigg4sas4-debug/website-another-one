@@ -4,7 +4,7 @@
   "description": "Express + Prisma API for the ecommerce frontend",
   "type": "commonjs",
   "scripts": {
-    "dev": "PORT=4000 npm run prisma:generate && PORT=4000 nodemon src/index.js",
+    "dev": "npm run prisma:generate && nodemon src/index.js",
     "start": "node src/index.js",
     "prisma:generate": "prisma generate",
     "migrate": "prisma migrate deploy",

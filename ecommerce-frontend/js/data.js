@@ -118,6 +118,10 @@ const apiClient = {
         const products = await apiRequest("/products", { method: "GET" });
         return products.map(normalizeProduct);
     },
+    async createProduct(payload) {
+        const product = await apiRequest("/products", { method: "POST", body: JSON.stringify(payload) });
+        return product;
+    },
     async getProduct(id) {
         const product = await apiRequest(`/products/${id}`, { method: "GET" });
         return normalizeProduct(product);
