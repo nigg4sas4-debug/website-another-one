@@ -1,3 +1,4 @@
+
  datasource db {
 
 datasource db {
@@ -15,12 +16,14 @@ model User {
   passwordHash String
   role         String    @default("CUSTOMER")
 
+
   role         UserRole  @default(CUSTOMER)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   cartItems    CartItem[]
   orders       Order[]
 }
+
 
 
 enum UserRole {
@@ -33,6 +36,7 @@ model Product {
   name        String
   description String
   price       Float
+
 
   price       Decimal     @db.Decimal(10, 2)
   imageUrl    String?
@@ -62,6 +66,7 @@ model Order {
   total       Float
   shipping    String?
 
+
   status      OrderStatus  @default(PENDING)
   total       Decimal      @db.Decimal(10, 2)
   shipping    Json?
@@ -86,6 +91,7 @@ model OrderItem {
   productId Int
   quantity  Int
   price     Float
+
 
   price     Decimal  @db.Decimal(10, 2)
 }
