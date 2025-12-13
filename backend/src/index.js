@@ -18,6 +18,16 @@ app.use(
 );
 app.use(express.json());
 
+// Simple request logger to help debugging (method, path, response status)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const ms = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, "../../ecommerce-frontend")));
 app.use(express.static(path.join(__dirname, "../../ecommerce-frontend/pages")));

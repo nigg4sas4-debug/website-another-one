@@ -71,6 +71,9 @@ router.get(
         items: { include: { product: true } },
         user: { select: { id: true, email: true, role: true } },
       },
+
+
+      include: { items: true, user: true },
       orderBy: { createdAt: "desc" },
     });
 

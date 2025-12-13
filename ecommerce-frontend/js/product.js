@@ -85,6 +85,13 @@
     async function addToCart(redirect) {
         const variation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
         const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes[0];
+        if (!window.apiClient?.getToken() && !getToken?.()) {
+            // not authenticated
+            if (confirm('You must be signed in to add items to the cart. Go to login?')) {
+                window.location.href = './login.html';
+            }
+            return;
+        }
         try {
             await apiClient.addToCart(product.id, 1);
             window.updateCartBadges?.();

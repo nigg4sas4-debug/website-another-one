@@ -1,5 +1,5 @@
 (async function () {
-    const form = document.getElementById("signup-form");
+    const form = document.getElementById("customer-signup");
     const statusEl = document.getElementById("signup-status");
 
     const setStatus = (message, tone = "info") => {
@@ -18,7 +18,7 @@
         const data = new FormData(form);
         const email = String(data.get("email") || "").trim();
         const password = String(data.get("password") || "").trim();
-        const confirm = String(data.get("confirm-password") || "").trim();
+        const confirm = String(data.get("confirm") || "").trim();
 
         if (!email || !password) {
             setStatus("Email and password are required.", "error");
