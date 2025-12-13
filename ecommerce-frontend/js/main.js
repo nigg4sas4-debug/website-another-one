@@ -1,4 +1,4 @@
-(function () {
+(async function () {
     const hamburgerMenu = document.getElementById("hamburger-menu");
     const hamburgerDropdown = document.getElementById("hamburger-dropdown");
 
@@ -19,21 +19,21 @@
     }
 
     const featuredGrid = document.getElementById("featured-grid");
-    if (featuredGrid && window.DataStore) {
-        const products = DataStore.loadProducts();
-        const featured = products.filter((p) => p.featured).slice(0, 6);
-        featuredGrid.innerHTML = featured
-            .map((product) => renderProductCard(product))
-            .join("");
-    }
-
     const categoryGrid = document.getElementById("category-grid");
-    if (categoryGrid && window.DataStore) {
-        const products = DataStore.loadProducts();
-        const categories = [...new Set(products.map((p) => p.category))];
-        categoryGrid.innerHTML = categories
-            .map(
-                (category) => `
+
+    async function hydrateProducts() {
+        if (!window.apiClient) return;
+        try {
+            const products = await apiClient.getProducts();
+            if (featuredGrid) {
+                const featured = products.slice(0, 6);
+                featuredGrid.innerHTML = featured.map((product) => renderProductCard(product)).join("");
+            }
+            if (categoryGrid) {
+                const categories = [...new Set(products.map((p) => p.category || "Essentials"))];
+                categoryGrid.innerHTML = categories
+                    .map(
+                        (category) => `
                 <article class="category-card">
                     <div class="category-icon">${category.charAt(0)}</div>
                     <div>
@@ -42,8 +42,17 @@
                     </div>
                 </article>
             `
-            )
-            .join("");
+                    )
+                    .join("");
+            }
+        } catch (err) {
+            if (featuredGrid) {
+                featuredGrid.innerHTML = `<p class="muted">Unable to load products from the API. ${err.message}</p>`;
+            }
+            if (categoryGrid) {
+                categoryGrid.innerHTML = `<p class="muted">Unable to load categories.</p>`;
+            }
+        }
     }
 
     const searchForms = document.querySelectorAll(".site-search");
@@ -56,17 +65,24 @@
         });
     });
 
-    window.updateCartBadges = function () {
-        if (!window.DataStore) return;
-        const cart = DataStore.loadCart();
-        const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
-        document.querySelectorAll("[data-cart-count]").forEach((el) => {
-            el.textContent = count;
-        });
+    window.updateCartBadges = async function () {
+        if (!window.apiClient) return;
+        try {
+            const cart = await apiClient.getCart();
+            const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+            document.querySelectorAll("[data-cart-count]").forEach((el) => {
+                el.textContent = count;
+            });
+        } catch (err) {
+            document.querySelectorAll("[data-cart-count]").forEach((el) => {
+                el.textContent = "0";
+            });
+        }
     };
 
     window.addEventListener("storage", () => window.updateCartBadges?.());
-    window.updateCartBadges();
+
+    await Promise.all([hydrateProducts(), window.updateCartBadges()]);
 })();
 
 function getPriceRange(product) {
