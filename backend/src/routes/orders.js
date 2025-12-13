@@ -4,6 +4,7 @@ const { authenticate, requireRole } = require("../middleware/auth");
 const asyncHandler = require("../utils/asyncHandler");
 
 const ORDER_STATUSES = ["PENDING", "PAID", "FULFILLED", "CANCELLED"];
+
 const ADMIN_ROLE = "ADMIN";
 
 const router = express.Router();
@@ -52,6 +53,11 @@ router.post(
 
     const response = { ...order, shipping: shipping ? JSON.parse(shipping) : null };
     res.status(201).json(response);
+
+    res.status(201).json({
+      ...order,
+      shipping: shipping ? JSON.parse(shipping) : null,
+    });
   })
 );
 
@@ -87,6 +93,8 @@ router.get(
 
     const isOwner = order.userId === req.user.id;
     const isAdmin = req.user.role === ADMIN_ROLE;
+
+
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -105,6 +113,8 @@ router.patch(
     const id = Number(req.params.id);
     const { status } = req.body;
     if (!status || !ORDER_STATUSES.includes(status)) {
+
+    if (!status || !["PENDING", "PAID", "FULFILLED", "CANCELLED"].includes(status)) {
       return res.status(400).json({ message: "Invalid order status" });
     }
 

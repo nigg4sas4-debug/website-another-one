@@ -2,6 +2,9 @@ const bcrypt = require("bcryptjs");
 const Prisma = require("@prisma/client");
 
 const prisma = new Prisma.PrismaClient();
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
 
 async function main() {
   const passwordHash = await bcrypt.hash("admin123", 10);
@@ -46,6 +49,16 @@ async function main() {
       update: product,
       create: product,
     });
+    try {
+      await prisma.product.create({ data: product });
+    } catch (e) {
+      if (e.code === "P2002") {
+        await prisma.product.update({
+          where: { name: product.name },
+          data: product,
+        });
+      }
+    }
   }
 }
 
@@ -57,4 +70,5 @@ main()
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);
+  });
   });
