@@ -572,6 +572,56 @@ main {
     gap: 16px;
 }
 
+.auth-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+}
+
+.input-row {
+    display: grid;
+    gap: 12px;
+}
+
+.checkbox-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.checkbox-row input {
+    margin-top: 4px;
+}
+
+.form-note {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.form-note[data-tone="error"] {
+    color: #b42318;
+}
+
+.form-note[data-tone="success"] {
+    color: #05603a;
+}
+
+@media (min-width: 768px) {
+    .auth-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+    }
+
+    .input-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .stacked {
     display: grid;
     gap: 14px;

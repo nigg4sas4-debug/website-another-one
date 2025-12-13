@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Catalog</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="../css/main.css?v=3">
     <link rel="stylesheet" href="../css/footer.css?v=3">
     <link rel="stylesheet" href="../css/product.css?v=3">
@@ -18,9 +18,7 @@
         <nav>
             <ul class="desktop-nav">
                 <li><a href="./index.html">Home</a></li>
-                <li><a href="./product-catalog.html" class="active">Catalog</a></li>
-                <li><a href="./about.html">About</a></li>
-                <li><a href="./contact.html">Contact</a></li>
+                <li><a href="./product-catalog.html">Catalog</a></li>
                 <li><a href="./order-tracking.html">Orders</a></li>
             </ul>
         </nav>
@@ -28,67 +26,56 @@
             <a class="pill" href="./settings.html" title="Settings"><i class="fa-solid fa-gear"></i></a>
             <a class="pill" href="./cart.html">Cart <span class="count-badge" data-cart-count>0</span></a>
             <a class="pill" href="./login.html">Login</a>
-            <a class="pill pill-accent" href="./signup.html">Sign up</a>
             <div id="hamburger-menu" class="hamburger-menu" aria-label="Toggle menu" tabindex="0">
                 <span></span><span></span><span></span>
             </div>
             <ul id="hamburger-dropdown" class="hamburger-dropdown">
-                <li><a href="./index.html">Home</a></li>
                 <li><a href="./product-catalog.html">Catalog</a></li>
+                <li><a href="./cart.html">Cart</a></li>
                 <li><a href="./order-tracking.html">Orders</a></li>
                 <li><a href="./login.html">Profile</a></li>
-                <li><a href="./signup.html">Sign up</a></li>
             </ul>
         </div>
     </header>
 
-    <main class="two-column">
-        <aside class="filters">
-            <div class="filter-header">
-                <h2>Filters</h2>
-                <button id="clear-filters" class="link">Clear</button>
-            </div>
-            <label>Category
-                <select id="filter-category">
-                    <option value="">All</option>
-                </select>
-            </label>
-            <label>Size
-                <select id="filter-size">
-                    <option value="">All</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="30">30</option>
-                    <option value="32">32</option>
-                    <option value="34">34</option>
-                </select>
-            </label>
-            <label>Availability
-                <select id="filter-availability">
-                    <option value="">Any</option>
-                    <option value="in">In stock</option>
-                    <option value="out">Out of stock</option>
-                </select>
-            </label>
-            <label>Price up to
-                <input type="range" id="filter-price" min="20" max="100" value="100">
-                <span id="price-value">$100</span>
-            </label>
-        </aside>
-        <section>
+    <main class="auth-grid section">
+        <section class="auth-card">
             <div class="section-header">
                 <div>
-                    <p class="eyebrow">Catalog</p>
-                    <h1>Discover the full line</h1>
-                </div>
-                <div class="chip-group">
-                    <button class="chip" data-sort="new">Newest</button>
-                    <button class="chip" data-sort="price-asc">Price ↑</button>
-                    <button class="chip" data-sort="price-desc">Price ↓</button>
+                    <p class="eyebrow">Customer</p>
+                    <h1>Create an account</h1>
                 </div>
             </div>
-            <div id="catalog-grid" class="product-grid"></div>
+            <form id="customer-signup" class="stacked">
+                <label>Full name<input required type="text" name="name" placeholder="Alex Morgan"></label>
+                <label>Email<input required type="email" name="email" placeholder="you@example.com"></label>
+                <div class="input-row">
+                    <label>Password<input required type="password" name="password" minlength="6" placeholder="At least 6 characters"></label>
+                    <label>Confirm password<input required type="password" name="confirm" minlength="6" placeholder="Repeat password"></label>
+                </div>
+                <label class="checkbox-row"><input type="checkbox" name="marketing">Send me product updates and offers</label>
+                <label class="checkbox-row"><input required type="checkbox" name="terms">I agree to the terms and privacy policy</label>
+                <button class="btn" type="submit">Create account</button>
+                <p id="signup-status" class="form-note" data-tone="info" aria-live="polite">Use a strong password and confirm it matches.</p>
+                <p class="form-note">Already have an account? <a class="link" href="./login.html">Sign in</a>.</p>
+            </form>
+        </section>
+        <section class="auth-card muted-bg">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Perks</p>
+                    <h2>Why join ETERNA LUXE?</h2>
+                </div>
+            </div>
+            <ul class="stacked" style="list-style: disc; padding-left: 18px;">
+                <li>Save shipping addresses, payment methods, and preferences.</li>
+                <li>Track orders and manage cancellations from one place.</li>
+                <li>Early access to drops, styling advice, and curated bundles.</li>
+            </ul>
+            <div class="checkout-card" style="margin-top:12px;">
+                <h3>Stay in sync</h3>
+                <p class="muted">We'll keep your profile aligned with your settings page so you can manage your account effortlessly.</p>
+            </div>
         </section>
     </main>
 
@@ -180,6 +167,6 @@
 
     <script src="../js/data.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/search.js"></script>
+    <script src="../js/signup.js"></script>
 </body>
 </html>

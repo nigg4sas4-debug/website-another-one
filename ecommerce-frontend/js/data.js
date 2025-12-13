@@ -11,6 +11,15 @@ const ImageFactory = {
     }
 };
 
+const defaultUsers = [
+    {
+        name: "Jane Doe",
+        email: "jane@eternaluxe.com",
+        password: "welcome123",
+        marketingOptIn: true,
+    },
+];
+
 const defaultProducts = [
     {
         id: "minimalist-tee",
@@ -264,6 +273,44 @@ function saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
+function seedUsers() {
+    const users = defaultUsers.map((user) => ({
+        ...user,
+        passwordHash: user.passwordHash || btoa(user.password),
+    }));
+    localStorage.setItem("users", JSON.stringify(users));
+    return users;
+}
+
+function loadUsers() {
+    const stored = localStorage.getItem("users");
+    if (!stored) return seedUsers();
+    try {
+        return JSON.parse(stored);
+    } catch (err) {
+        console.warn("Unable to parse users from storage", err);
+        return seedUsers();
+    }
+}
+
+function saveUsers(users) {
+    localStorage.setItem("users", JSON.stringify(users));
+}
+
+function setCurrentUser(email) {
+    if (!email) {
+        localStorage.removeItem("currentUserEmail");
+        return;
+    }
+    localStorage.setItem("currentUserEmail", email);
+}
+
+function getCurrentUser() {
+    const email = localStorage.getItem("currentUserEmail");
+    if (!email) return null;
+    return loadUsers().find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
+}
+
 window.DataStore = {
     loadProducts,
     saveProducts,
@@ -271,6 +318,10 @@ window.DataStore = {
     saveOrders,
     loadCart,
     saveCart,
+    loadUsers,
+    saveUsers,
+    setCurrentUser,
+    getCurrentUser,
 };
 
 window.ImageFactory = ImageFactory;
