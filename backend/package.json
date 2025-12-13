@@ -4,6 +4,10 @@
   "description": "Express + Prisma API for the ecommerce frontend",
   "type": "commonjs",
   "scripts": {
+    "dev": "npm run prisma:generate && nodemon src/index.js",
+    "start": "node src/index.js",
+    "prisma:generate": "prisma generate",
+
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "migrate": "prisma migrate deploy",
