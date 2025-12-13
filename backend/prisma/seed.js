@@ -1,7 +1,4 @@
 const bcrypt = require("bcryptjs");
-const Prisma = require("@prisma/client");
-
-const prisma = new Prisma.PrismaClient();
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -44,19 +41,17 @@ async function main() {
   ];
 
   for (const product of products) {
-    await prisma.product.upsert({
-      where: { name: product.name },
-      update: product,
-      create: product,
-    });
     try {
       await prisma.product.create({ data: product });
     } catch (e) {
+      // unique constraint violation -> update existing
       if (e.code === "P2002") {
         await prisma.product.update({
           where: { name: product.name },
           data: product,
         });
+      } else {
+        throw e;
       }
     }
   }
@@ -70,5 +65,4 @@ main()
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);
-  });
   });
