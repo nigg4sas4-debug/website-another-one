@@ -43,7 +43,10 @@ router.post(
             })),
           },
         },
-        include: { items: true },
+        include: {
+          items: { include: { product: true } },
+          user: { select: { id: true, email: true, role: true } },
+        },
       });
 
       await tx.cartItem.deleteMany({ where: { userId: req.user.id } });
@@ -59,12 +62,18 @@ router.post(
 
 router.get(
   "/",
-  requireRole(ADMIN_ROLE),
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (req, res) => {
+    const isAdmin = req.user.role === ADMIN_ROLE;
+
     const orders = await prisma.order.findMany({
-      include: { items: true, user: true },
+      where: isAdmin ? {} : { userId: req.user.id },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
+
     res.json(
       orders.map((order) => ({
         ...order,
@@ -80,7 +89,10 @@ router.get(
     const id = Number(req.params.id);
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { items: { include: { product: true } }, user: true },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
     });
 
     if (!order) {
@@ -119,7 +131,10 @@ router.patch(
     const updated = await prisma.order.update({
       where: { id },
       data: { status },
-      include: { items: true, user: true },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
     });
 
     res.json({

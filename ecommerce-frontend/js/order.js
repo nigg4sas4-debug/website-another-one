@@ -35,7 +35,13 @@
                 const statusPill = cancellationState
                     ? `<span class="pill pill-accent">Cancellation ${cancellationState.toLowerCase()}</span>`
                     : `<span class="pill">${order.status}</span>`;
-                const items = order.items?.map((item) => `${item.product.name} x${item.quantity}`).join("<br>") || "";
+                const items = order.items
+                    ?.map((item) => {
+                        const name = item.product?.name || `Product ${item.productId}`;
+                        return `${name} x${item.quantity}`;
+                    })
+                    .join("<br>")
+                    || "";
                 return `
             <article class="order-card">
                 <header>
