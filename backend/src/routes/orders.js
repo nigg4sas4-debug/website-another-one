@@ -43,7 +43,10 @@ router.post(
             })),
           },
         },
-        include: { items: true },
+        include: {
+          items: { include: { product: true } },
+          user: { select: { id: true, email: true, role: true } },
+        },
       });
 
       await tx.cartItem.deleteMany({ where: { userId: req.user.id } });
@@ -64,6 +67,11 @@ router.get(
 
     const orders = await prisma.order.findMany({
       where: isAdmin ? {} : { userId: req.user.id },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
+
       include: { items: true, user: true },
       orderBy: { createdAt: "desc" },
     });
@@ -83,7 +91,10 @@ router.get(
     const id = Number(req.params.id);
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { items: { include: { product: true } }, user: true },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
     });
 
     if (!order) {
@@ -122,7 +133,10 @@ router.patch(
     const updated = await prisma.order.update({
       where: { id },
       data: { status },
-      include: { items: true, user: true },
+      include: {
+        items: { include: { product: true } },
+        user: { select: { id: true, email: true, role: true } },
+      },
     });
 
     res.json({

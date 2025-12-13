@@ -4,6 +4,7 @@ dotenv.config();
 
 const config = {
   port: process.env.PORT || 4000,
+
   port: process.env.PORT || 3000,
   // Ensure default local development port is 3000 to match frontend and existing setup
   // If you want to override, set PORT in backend/.env

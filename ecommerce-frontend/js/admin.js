@@ -68,7 +68,9 @@
                     <article class="order-row" data-id="${order.id}">
                         <div>
                             <strong>Order ${order.id}</strong>
-                            <p class="muted">${order.items?.map((item) => item.product.name).join(", ")}</p>
+                            <p class="muted">${order.items
+                                ?.map((item) => item.product?.name || `Product ${item.productId}`)
+                                .join(", ")}</p>
                         </div>
                         <select data-action="status">
                             ${["PENDING", "PAID", "FULFILLED", "CANCELLED"].map(
