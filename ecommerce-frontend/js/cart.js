@@ -1,5 +1,5 @@
-(function () {
-    if (!window.DataStore) return;
+(async function () {
+    if (!window.apiClient) return;
     const cartContainer = document.getElementById("cart-items") || document.getElementById("checkout-items");
     const subtotalEl = document.getElementById("cart-subtotal") || document.getElementById("checkout-subtotal");
     const totalEl = document.getElementById("checkout-total");
@@ -7,21 +7,32 @@
     const continueBtn = document.getElementById("continue-shopping");
     const form = document.getElementById("checkout-form");
 
-    function renderCart() {
-        const cart = DataStore.loadCart();
+    async function loadCart() {
+        try {
+            return await apiClient.getCart();
+        } catch (err) {
+            if (cartContainer) {
+                cartContainer.innerHTML = `<p class="muted">Please log in to view your cart.</p>`;
+            }
+            return [];
+        }
+    }
+
+    async function renderCart() {
+        const cart = await loadCart();
         if (!cartContainer) return;
         if (cart.length === 0) {
             cartContainer.innerHTML = `<p class="muted">Your cart is empty.</p>`;
         } else {
             cartContainer.innerHTML = cart
                 .map(
-                    (item, index) => `
+                    (item) => `
                 <article class="cart-item">
                     <div class="cart-thumb" style="background-image: url('${item.image}')"></div>
                     <div class="cart-meta">
                         <h3>${item.name}</h3>
                         <p class="muted">${item.variation} • Size ${item.size}</p>
-                        <div class="cart-actions" data-index="${index}">
+                        <div class="cart-actions" data-id="${item.cartItemId}">
                             <label>Qty <input type="number" min="1" value="${item.qty}"></label>
                             <button class="link" data-action="remove">Remove</button>
                         </div>
@@ -32,11 +43,10 @@
                 )
                 .join("");
         }
-        updateTotals();
+        updateTotals(cart);
     }
 
-    function updateTotals() {
-        const cart = DataStore.loadCart();
+    function updateTotals(cart) {
         const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
         if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
         if (totalEl) totalEl.textContent = `$${subtotal.toFixed(2)}`;
@@ -44,27 +54,36 @@
         window.updateCartBadges?.();
     }
 
-    cartContainer?.addEventListener("change", (event) => {
+    cartContainer?.addEventListener("change", async (event) => {
         const target = event.target;
         if (target.tagName === "INPUT") {
-            const index = Number(target.closest(".cart-actions")?.dataset.index);
-            const cart = DataStore.loadCart();
-            if (cart[index]) {
-                cart[index].qty = Math.max(1, Number(target.value));
-                DataStore.saveCart(cart);
-                renderCart();
+            const itemId = Number(target.closest(".cart-actions")?.dataset.id);
+            if (itemId) {
+                const qty = Math.max(1, Number(target.value));
+                try {
+                    const cart = await apiClient.updateCartItem(itemId, qty);
+                    updateTotals(cart);
+                    await renderCart();
+                } catch (err) {
+                    alert(`Unable to update cart: ${err.message}`);
+                }
             }
         }
     });
 
-    cartContainer?.addEventListener("click", (event) => {
+    cartContainer?.addEventListener("click", async (event) => {
         const target = event.target;
         if (target instanceof HTMLElement && target.dataset.action === "remove") {
-            const index = Number(target.closest(".cart-actions")?.dataset.index);
-            const cart = DataStore.loadCart();
-            cart.splice(index, 1);
-            DataStore.saveCart(cart);
-            renderCart();
+            const itemId = Number(target.closest(".cart-actions")?.dataset.id);
+            if (itemId) {
+                try {
+                    const cart = await apiClient.removeCartItem(itemId);
+                    updateTotals(cart);
+                    await renderCart();
+                } catch (err) {
+                    alert(`Unable to remove item: ${err.message}`);
+                }
+            }
         }
     });
 
@@ -72,37 +91,30 @@
         window.location.href = "./product-catalog.html";
     });
 
-    form?.addEventListener("submit", (event) => {
+    form?.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const cart = DataStore.loadCart();
+        const cart = await loadCart();
         if (cart.length === 0) {
             alert("Add items to your cart before checking out.");
             return;
         }
         const data = new FormData(form);
-        const orderId = `ORD-${Math.floor(Math.random() * 9000 + 1000)}`;
-        const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-        const order = {
-            id: orderId,
-            customer: data.get("name") || "Guest",
-            email: data.get("email") || "",
-            phone: data.get("phone") || "",
-            address: data.get("address") || "",
-            city: data.get("city") || "",
-            zip: data.get("zip") || "",
-            items: cart,
-            status: "Pending",
-            cancellationRequest: null,
-            total,
-            eta: "Aug 28, 2024",
+        const shipping = {
+            name: data.get("name"),
+            email: data.get("email"),
+            phone: data.get("phone"),
+            address: data.get("address"),
+            city: data.get("city"),
+            zip: data.get("zip"),
         };
-        const orders = DataStore.loadOrders();
-        orders.unshift(order);
-        DataStore.saveOrders(orders);
-        DataStore.saveCart([]);
-        alert(`Order ${orderId} placed!`);
-        window.location.href = "./order-tracking.html";
+        try {
+            const order = await apiClient.createOrder(shipping);
+            alert(`Order ${order.id} placed!`);
+            window.location.href = "./order-tracking.html";
+        } catch (err) {
+            alert(`Checkout failed: ${err.message}`);
+        }
     });
 
-    renderCart();
+    await renderCart();
 })();

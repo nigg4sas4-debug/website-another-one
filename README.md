@@ -86,5 +86,6 @@ Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/pr
 - [x] Add Prisma models and migrations.
 - [x] Seed products and an admin user.
 - [x] Implement auth, product, cart, and order routes.
+- [x] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Add payment endpoints when you are ready to integrate a provider.

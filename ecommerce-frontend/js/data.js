@@ -1,3 +1,6 @@
+const API_BASE = window.API_BASE || "http://localhost:3000";
+const AUTH_TOKEN_KEY = "authToken";
+
 const ImageFactory = {
     createPlaceholder(title, colors = ["#4c6fff", "#7ce7ac"]) {
         const [start, end] = colors;
@@ -11,317 +14,148 @@ const ImageFactory = {
     }
 };
 
-const defaultUsers = [
-    {
-        name: "Jane Doe",
-        email: "jane@eternaluxe.com",
-        password: "welcome123",
-        marketingOptIn: true,
-    },
-];
-
-const defaultProducts = [
-    {
-        id: "minimalist-tee",
-        name: "Minimalist Tee",
-        category: "Shirts",
-        price: 28,
-        description: "Soft cotton tee with breathable fabric and a clean silhouette for everyday wear.",
-        featured: true,
-        available: true,
-        badges: ["New", "Organic"],
-        rating: 4.5,
-        variations: [
-            {
-                name: "Plain",
-                image: ImageFactory.createPlaceholder("Plain Tee", ["#1f4b99", "#73b6ff"]),
-                gallery: ["#1f4b99", "#73b6ff"],
-                sizes: [
-                    { label: "S", stock: 6, price: 28 },
-                    { label: "M", stock: 12, price: 28 },
-                    { label: "L", stock: 5, price: 28 }
-                ]
-            },
-            {
-                name: "Japanese Print",
-                image: ImageFactory.createPlaceholder("Jap Print", ["#003f5c", "#ffa600"]),
-                gallery: ["#003f5c", "#ffa600"],
-                sizes: [
-                    { label: "S", stock: 2, price: 32 },
-                    { label: "M", stock: 10, price: 32 },
-                    { label: "L", stock: 0, price: 32 }
-                ]
-            },
-            {
-                name: "Anime Print",
-                image: ImageFactory.createPlaceholder("Anime", ["#ef476f", "#ffd166"]),
-                gallery: ["#ef476f", "#ffd166"],
-                sizes: [
-                    { label: "S", stock: 9, price: 34 },
-                    { label: "M", stock: 4, price: 34 },
-                    { label: "L", stock: 1, price: 34 }
-                ]
-            }
-        ]
-    },
-    {
-        id: "denim-jacket",
-        name: "Denim Jacket",
-        category: "Jackets",
-        price: 72,
-        description: "Structured denim jacket with contrast stitching and inner lining for cooler evenings.",
-        featured: true,
-        available: true,
-        badges: ["Best Seller"],
-        rating: 4.8,
-        variations: [
-            {
-                name: "Indigo",
-                image: ImageFactory.createPlaceholder("Indigo", ["#264653", "#2a9d8f"]),
-                gallery: ["#264653", "#2a9d8f"],
-                sizes: [
-                    { label: "S", stock: 4, price: 72 },
-                    { label: "M", stock: 8, price: 72 },
-                    { label: "L", stock: 6, price: 72 }
-                ]
-            },
-            {
-                name: "Washed",
-                image: ImageFactory.createPlaceholder("Washed", ["#557a95", "#c9d6df"]),
-                gallery: ["#557a95", "#c9d6df"],
-                sizes: [
-                    { label: "S", stock: 2, price: 75 },
-                    { label: "M", stock: 5, price: 75 },
-                    { label: "L", stock: 0, price: 75 }
-                ]
-            }
-        ]
-    },
-    {
-        id: "tailored-trousers",
-        name: "Tailored Trousers",
-        category: "Trousers",
-        price: 54,
-        description: "Slim-cut trousers with four-way stretch and a clean taper for the office or weekend.",
-        featured: false,
-        available: true,
-        badges: ["Stretch"],
-        rating: 4.2,
-        variations: [
-            {
-                name: "Black",
-                image: ImageFactory.createPlaceholder("Black", ["#0f0f0f", "#3a3a3a"]),
-                gallery: ["#0f0f0f", "#3a3a3a"],
-                sizes: [
-                    { label: "30", stock: 10, price: 54 },
-                    { label: "32", stock: 12, price: 54 },
-                    { label: "34", stock: 7, price: 54 }
-                ]
-            },
-            {
-                name: "Charcoal",
-                image: ImageFactory.createPlaceholder("Charcoal", ["#3d405b", "#81b29a"]),
-                gallery: ["#3d405b", "#81b29a"],
-                sizes: [
-                    { label: "30", stock: 5, price: 56 },
-                    { label: "32", stock: 0, price: 56 },
-                    { label: "34", stock: 3, price: 56 }
-                ]
-            }
-        ]
-    },
-    {
-        id: "linen-shirt",
-        name: "Linen Resort Shirt",
-        category: "Shirts",
-        price: 48,
-        description: "Lightweight linen shirt with camp collar and airy weave for sunny days.",
-        featured: true,
-        available: true,
-        badges: ["Breezy"],
-        rating: 4.3,
-        variations: [
-            {
-                name: "Sand",
-                image: ImageFactory.createPlaceholder("Sand", ["#f4a261", "#e9c46a"]),
-                gallery: ["#f4a261", "#e9c46a"],
-                sizes: [
-                    { label: "S", stock: 8, price: 48 },
-                    { label: "M", stock: 6, price: 48 },
-                    { label: "L", stock: 5, price: 48 }
-                ]
-            },
-            {
-                name: "Sea",
-                image: ImageFactory.createPlaceholder("Sea", ["#0096c7", "#90e0ef"]),
-                gallery: ["#0096c7", "#90e0ef"],
-                sizes: [
-                    { label: "S", stock: 3, price: 50 },
-                    { label: "M", stock: 0, price: 50 },
-                    { label: "L", stock: 1, price: 50 }
-                ]
-            }
-        ]
-    },
-    {
-        id: "performance-hoodie",
-        name: "Performance Hoodie",
-        category: "Jackets",
-        price: 64,
-        description: "Moisture-wicking hoodie with bonded seams and roomy kangaroo pocket.",
-        featured: false,
-        available: true,
-        badges: ["Athletic"],
-        rating: 4.6,
-        variations: [
-            {
-                name: "Slate",
-                image: ImageFactory.createPlaceholder("Slate", ["#14213d", "#8d99ae"]),
-                gallery: ["#14213d", "#8d99ae"],
-                sizes: [
-                    { label: "S", stock: 9, price: 64 },
-                    { label: "M", stock: 7, price: 64 },
-                    { label: "L", stock: 4, price: 64 }
-                ]
-            },
-            {
-                name: "Olive",
-                image: ImageFactory.createPlaceholder("Olive", ["#606c38", "#bc6c25"]),
-                gallery: ["#606c38", "#bc6c25"],
-                sizes: [
-                    { label: "S", stock: 5, price: 66 },
-                    { label: "M", stock: 2, price: 66 },
-                    { label: "L", stock: 0, price: 66 }
-                ]
-            }
-        ]
-    }
-];
-
-const defaultOrders = [
-    {
-        id: "ORD-1046",
-        customer: "Maya Patel",
-        email: "maya@eternaluxe.com",
-        phone: "(555) 321-4567",
-        address: "88 North Ave",
-        city: "Seattle",
-        zip: "98101",
-        items: [
-            { productId: "minimalist-tee", name: "Minimalist Tee", variation: "Anime Print", size: "M", qty: 1, price: 34 }
-        ],
-        status: "Processing",
-        total: 34,
-        eta: "Aug 24, 2024"
-    },
-    {
-        id: "ORD-1047",
-        customer: "Liam Chen",
-        email: "liam@eternaluxe.com",
-        phone: "(555) 654-9999",
-        address: "215 Lake View",
-        city: "Austin",
-        zip: "73301",
-        items: [
-            { productId: "denim-jacket", name: "Denim Jacket", variation: "Indigo", size: "M", qty: 1, price: 72 }
-        ],
-        status: "Pending",
-        total: 72,
-        eta: "Aug 26, 2024"
-    }
-];
-
-function loadProducts() {
-    const saved = localStorage.getItem("products");
-    if (saved) {
-        return JSON.parse(saved);
-    }
-    localStorage.setItem("products", JSON.stringify(defaultProducts));
-    return JSON.parse(JSON.stringify(defaultProducts));
+function getToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || null;
 }
 
-function saveProducts(list) {
-    localStorage.setItem("products", JSON.stringify(list));
-}
-
-function normalizeOrders(list) {
-    return list.map((order) => ({
-        cancellationRequest: order.cancellationRequest || null,
-        ...order,
-    }));
-}
-
-function loadOrders() {
-    const saved = localStorage.getItem("orders");
-    if (saved) {
-        return normalizeOrders(JSON.parse(saved));
-    }
-    localStorage.setItem("orders", JSON.stringify(defaultOrders));
-    return normalizeOrders(JSON.parse(JSON.stringify(defaultOrders)));
-}
-
-function saveOrders(list) {
-    localStorage.setItem("orders", JSON.stringify(list));
-}
-
-function loadCart() {
-    const saved = localStorage.getItem("cart");
-    return saved ? JSON.parse(saved) : [];
-}
-
-function saveCart(cart) {
-    localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-function seedUsers() {
-    const users = defaultUsers.map((user) => ({
-        ...user,
-        passwordHash: user.passwordHash || btoa(user.password),
-    }));
-    localStorage.setItem("users", JSON.stringify(users));
-    return users;
-}
-
-function loadUsers() {
-    const stored = localStorage.getItem("users");
-    if (!stored) return seedUsers();
-    try {
-        return JSON.parse(stored);
-    } catch (err) {
-        console.warn("Unable to parse users from storage", err);
-        return seedUsers();
-    }
-}
-
-function saveUsers(users) {
-    localStorage.setItem("users", JSON.stringify(users));
-}
-
-function setCurrentUser(email) {
-    if (!email) {
-        localStorage.removeItem("currentUserEmail");
+function setToken(token) {
+    if (!token) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
         return;
     }
-    localStorage.setItem("currentUserEmail", email);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
 }
 
-function getCurrentUser() {
-    const email = localStorage.getItem("currentUserEmail");
-    if (!email) return null;
-    return loadUsers().find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
+async function apiRequest(path, options = {}) {
+    const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+    const token = getToken();
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+    });
+
+    if (response.status === 401) {
+        setToken(null);
+    }
+
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : null;
+
+    if (!response.ok) {
+        const message = data?.message || `Request failed with status ${response.status}`;
+        throw new Error(message);
+    }
+
+    return data;
 }
 
-window.DataStore = {
-    loadProducts,
-    saveProducts,
-    loadOrders,
-    saveOrders,
-    loadCart,
-    saveCart,
-    loadUsers,
-    saveUsers,
-    setCurrentUser,
-    getCurrentUser,
+function normalizeProduct(product) {
+    const image = product.imageUrl || ImageFactory.createPlaceholder(product.name || "Product");
+    return {
+        id: String(product.id),
+        name: product.name,
+        description: product.description,
+        category: product.category || "Essentials",
+        price: product.price,
+        rating: product.rating || 4.5,
+        featured: product.featured ?? true,
+        available: (product.stock ?? 0) > 0,
+        badges: product.badges || [],
+        variations: [
+            {
+                name: "Default",
+                image,
+                gallery: [image],
+                sizes: [
+                    {
+                        label: "OS",
+                        stock: product.stock ?? 0,
+                        price: product.price,
+                    },
+                ],
+            },
+        ],
+    };
+}
+
+function mapCartItem(item) {
+    const product = normalizeProduct(item.product);
+    const variation = product.variations[0];
+    const size = variation.sizes[0];
+    return {
+        productId: product.id,
+        name: product.name,
+        variation: variation.name,
+        size: size.label,
+        price: size.price,
+        qty: item.quantity,
+        image: variation.image,
+        cartItemId: item.id,
+    };
+}
+
+const apiClient = {
+    getToken,
+    setToken,
+    async login(email, password) {
+        const data = await apiRequest("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+        setToken(data.token);
+        return data.user;
+    },
+    async register(email, password) {
+        const data = await apiRequest("/auth/register", { method: "POST", body: JSON.stringify({ email, password }) });
+        setToken(data.token);
+        return data.user;
+    },
+    async me() {
+        return apiRequest("/me", { method: "GET" });
+    },
+    async getProducts() {
+        const products = await apiRequest("/products", { method: "GET" });
+        return products.map(normalizeProduct);
+    },
+    async getProduct(id) {
+        const product = await apiRequest(`/products/${id}`, { method: "GET" });
+        return normalizeProduct(product);
+    },
+    async getCart() {
+        const cart = await apiRequest("/cart", { method: "GET" });
+        return cart.items.map(mapCartItem);
+    },
+    async addToCart(productId, quantity = 1) {
+        const cart = await apiRequest("/cart/items", { method: "POST", body: JSON.stringify({ productId: Number(productId), quantity }) });
+        return cart.items.map(mapCartItem);
+    },
+    async updateCartItem(itemId, quantity) {
+        const cart = await apiRequest(`/cart/items/${itemId}`, { method: "PATCH", body: JSON.stringify({ quantity }) });
+        return cart.items.map(mapCartItem);
+    },
+    async removeCartItem(itemId) {
+        const cart = await apiRequest(`/cart/items/${itemId}`, { method: "DELETE" });
+        return cart.items.map(mapCartItem);
+    },
+    async createOrder(shipping) {
+        const order = await apiRequest("/orders", { method: "POST", body: JSON.stringify({ shipping }) });
+        return order;
+    },
+    async listOrders() {
+        const orders = await apiRequest("/orders", { method: "GET" });
+        return orders;
+    },
+    async getOrder(id) {
+        return apiRequest(`/orders/${id}`, { method: "GET" });
+    },
+    async cancelOrder(id) {
+        return apiRequest(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status: "CANCELLED" }) });
+    },
+    async updateOrderStatus(id, status) {
+        return apiRequest(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+    },
 };
 
+window.apiClient = apiClient;
 window.ImageFactory = ImageFactory;

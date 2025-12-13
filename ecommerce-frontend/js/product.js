@@ -1,9 +1,7 @@
-(function () {
-    if (!window.DataStore) return;
+(async function () {
+    if (!window.apiClient) return;
     const params = new URLSearchParams(window.location.search);
-    const productId = params.get("id") || "minimalist-tee";
-    const products = DataStore.loadProducts();
-    const product = products.find((p) => p.id === productId) || products[0];
+    const productId = params.get("id");
 
     const nameEl = document.getElementById("product-name");
     const descEl = document.getElementById("product-description");
@@ -18,8 +16,22 @@
     const addToCartBtn = document.getElementById("add-to-cart");
     const buyNowBtn = document.getElementById("buy-now");
     const relatedGrid = document.getElementById("related-grid");
-    const basePriceRange = window.getPriceRange?.(product) || "$0.00";
 
+    let products = [];
+    let product = null;
+
+    try {
+        products = await apiClient.getProducts();
+        product = productId ? products.find((p) => String(p.id) === productId) : products[0];
+        if (!product) {
+            product = products[0];
+        }
+    } catch (err) {
+        if (nameEl) nameEl.textContent = "Unable to load product";
+        return;
+    }
+
+    const basePriceRange = window.getPriceRange?.(product) || "$0.00";
     if (!product || !variationSelect) return;
 
     nameEl.textContent = product.name;
@@ -70,31 +82,20 @@
         buyNowBtn.disabled = out;
     }
 
-    function addToCart(redirect) {
+    async function addToCart(redirect) {
         const variation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
         const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes[0];
-        const cart = DataStore.loadCart();
-        const existing = cart.find((item) => item.productId === product.id && item.variation === variation.name && item.size === size.label);
-        if (existing) {
-            existing.qty += 1;
-        } else {
-            cart.push({
-                productId: product.id,
-                name: product.name,
-                variation: variation.name,
-                size: size.label,
-                price: size.price,
-                qty: 1,
-                image: variation.image,
-            });
-        }
-        DataStore.saveCart(cart);
-        window.updateCartBadges?.();
-        if (redirect) {
-            window.location.href = "./checkout.html";
-        } else {
-            addToCartBtn.textContent = "Added";
-            setTimeout(() => (addToCartBtn.textContent = "Add to Cart"), 1200);
+        try {
+            await apiClient.addToCart(product.id, 1);
+            window.updateCartBadges?.();
+            if (redirect) {
+                window.location.href = "./checkout.html";
+            } else {
+                addToCartBtn.textContent = "Added";
+                setTimeout(() => (addToCartBtn.textContent = "Add to Cart"), 1200);
+            }
+        } catch (err) {
+            alert(`Unable to add to cart: ${err.message}`);
         }
     }
 
