@@ -36,15 +36,17 @@
         </div>
     </header>
 
-    <main class="checkout-grid section">
-        <section>
-            <div class="section-header">
-                <div>
-                    <p class="eyebrow">Checkout</p>
-                    <h1>Shipping details</h1>
-                </div>
+    <main class="checkout-page">
+        <header class="section-header">
+            <div>
+                <p class="eyebrow">Checkout</p>
+                <h1>Shipping and review</h1>
             </div>
-            <form id="checkout-form" class="stacked form-card">
+        </header>
+        <section class="checkout-card">
+            <h3>Shipping details</h3>
+            <p class="muted">Enter the address and contact details for this delivery.</p>
+            <form id="checkout-form" class="stacked">
                 <div class="grid-2">
                     <label>Full Name<input required type="text" name="name" placeholder="Your name"></label>
                     <label>Email<input required type="email" name="email" placeholder="you@example.com"></label>
@@ -58,15 +60,18 @@
                 <button class="btn" type="submit">Place order</button>
             </form>
         </section>
-        <aside class="checkout-summary form-card">
+        <section class="checkout-card">
             <h3>Cart summary</h3>
             <p class="muted">Verify quantities and shipping details before confirming your order.</p>
             <div id="checkout-items" class="cart-list compact"></div>
-            <div class="totals">
+        </section>
+        <section class="checkout-summary">
+            <h3>Totals</h3>
+            <div class="totals stacked-totals">
                 <div class="row"><span>Subtotal</span><strong id="checkout-subtotal">$0.00</strong></div>
                 <div class="row"><span>Estimated total</span><strong id="checkout-total">$0.00</strong></div>
             </div>
-        </aside>
+        </section>
     </main>
 
         <!-- Begin shared footer component -->

@@ -69,9 +69,22 @@
     window.updateCartBadges();
 })();
 
+function getPriceRange(product) {
+    if (!product?.variations?.length) return "$0.00";
+    const prices = product.variations.flatMap((variation) => variation.sizes?.map((size) => size.price) || []);
+    const valid = prices.filter((p) => typeof p === "number");
+    if (!valid.length) return "$0.00";
+    const min = Math.min(...valid);
+    const max = Math.max(...valid);
+    if (min === max) return `$${min.toFixed(2)}`;
+    return `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+}
+
+window.getPriceRange = getPriceRange;
+
 function renderProductCard(product) {
     const firstVariation = product.variations[0];
-    const displayPrice = firstVariation?.sizes?.[0]?.price ?? product.price;
+    const displayPrice = getPriceRange(product);
     return `
         <a class="product-card" href="./product-detail.html?id=${product.id}">
             <div class="product-image" style="background-image: url('${firstVariation.image}')"></div>
@@ -83,7 +96,7 @@ function renderProductCard(product) {
                 <h3>${product.name}</h3>
                 <p class="muted">${product.description}</p>
                 <div class="product-footer">
-                    <span class="price">$${displayPrice.toFixed(2)}</span>
+                    <span class="price">${displayPrice}</span>
                     <span class="rating">★ ${product.rating}</span>
                 </div>
             </div>
