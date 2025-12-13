@@ -1,6 +1,5 @@
 // Prisma schema for SQLite backend
 
-
 // =======================
 // DATABASE CONFIGURATION
 // =======================
@@ -13,6 +12,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// =======================
+// MODELS
+// =======================
+
 model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique
@@ -21,26 +24,12 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-// =======================
-// MODELS
-// =======================
-
-model User {
-  id           Int        @id @default(autoincrement())
-  email        String     @unique
-  passwordHash String
-  role         String     @default("CUSTOMER")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
   cartItems    CartItem[]
   orders       Order[]
 }
 
 model Product {
   id          Int         @id @default(autoincrement())
-
-  id          Int        @id @default(autoincrement())
   name        String
   description String
   price       Float
@@ -48,9 +37,6 @@ model Product {
   stock       Int         @default(0)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  stock       Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
 
   orderItems  OrderItem[]
   cartItems   CartItem[]
@@ -59,10 +45,6 @@ model Product {
 model CartItem {
   id        Int      @id @default(autoincrement())
   quantity  Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
 
@@ -82,21 +64,6 @@ model Order {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   items       OrderItem[]
-
-  id        Int        @id @default(autoincrement())
-
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-
-  status    String     @default("PENDING")
-  total     Float
-  shipping  String?
-
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  items     OrderItem[]
-
 }
 
 model OrderItem {
@@ -105,17 +72,6 @@ model OrderItem {
   orderId   Int
   product   Product  @relation(fields: [productId], references: [id])
   productId Int
-  quantity  Int
-  price     Float
-}
-
-
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   Int
-
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
-
   quantity  Int
   price     Float
 }
