@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Settings — ETERNA LUXE</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/main.css?v=3">
+  <link rel="stylesheet" href="../css/footer.css?v=3">
+
+  <style>
+    :root{
+      --settings-bg: #f7f7f8;
+      --settings-card: #ffffff;
+      --settings-muted: #6b7280;
+      --settings-text: #111827;
+      --settings-accent: #8b7d6b;
+      --settings-radius: 12px;
+      --settings-shadow: 0 8px 24px rgba(15,23,42,0.08);
+      --settings-glass: rgba(255,255,255,0.65);
+    }
+    [data-theme="dark"] {
+      --settings-bg: #0b0f16;
+      --settings-card: #0f1720;
+      --settings-muted: #9ca3af;
+      --settings-text: #e6eef8;
+      --settings-accent: #b49574;
+      --settings-shadow: 0 6px 20px rgba(2,6,23,0.6);
+      --settings-glass: rgba(255,255,255,0.03);
+    }
+
+    .settings-page * {box-sizing: border-box;}
+    .settings-page { background: linear-gradient(180deg, var(--settings-bg), #fff); padding: 28px 20px; }
+    .settings-container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:260px 1fr;gap:20px}
+    @media (max-width:900px){.settings-container{grid-template-columns:1fr}}
+
+    /* Sidebar */
+    .settings-sidebar{background:var(--settings-card);border-radius:var(--settings-radius);padding:18px;box-shadow:var(--settings-shadow);position:sticky;top:28px;height:fit-content}
+    .settings-brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .settings-brand .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--settings-accent),#5a4a39);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}
+    .settings-brand h3{margin:0;font-size:15px;letter-spacing:1px;color:var(--settings-text)}
+    .settings-brand .tagline{color:var(--settings-muted);font-size:12px}
+    .settings-nav{display:grid;gap:6px;margin-top:8px}
+    .settings-nav button{all:unset;cursor:pointer;padding:10px 12px;border-radius:10px;color:var(--settings-muted);display:flex;gap:12px;align-items:center;font-size:14px;transition:all 0.2s}
+    .settings-nav button:hover{background:rgba(0,0,0,0.03)}
+    .settings-nav button.active{background:linear-gradient(90deg,rgba(139,125,107,0.08),rgba(139,125,107,0.03));color:var(--settings-text);font-weight:600}
+    .settings-nav i{width:18px;text-align:center}
+    .settings-sidebar .help{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(0,0,0,0.06);font-size:13px;color:var(--settings-muted)}
+    .settings-sidebar a{color:var(--settings-accent);text-decoration:none}
+
+    /* Panel */
+    .settings-panel{background:var(--settings-card);border-radius:var(--settings-radius);padding:22px;box-shadow:var(--settings-shadow);display:none}
+    .settings-panel.active{display:block}
+    .settings-panel h2{margin:0 0 16px;font-size:18px;color:var(--settings-text);font-weight:700}
+
+    .settings-field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .settings-field label{font-size:13px;color:var(--settings-muted);font-weight:500}
+    .settings-field input[type="text"], .settings-field input[type="email"], .settings-field input[type="tel"], .settings-field select, .settings-field input[type="date"], .settings-field input[type="password"], .settings-field textarea{padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:var(--settings-glass);color:var(--settings-text);font-family:inherit;font-size:14px}
+    .settings-field input[type="color"]{height:40px;width:100%;border-radius:8px;border:none;padding:4px;background:transparent}
+    .settings-field textarea{resize:vertical}
+
+    .settings-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:700px){.settings-cols{grid-template-columns:1fr}}
+
+    .settings-btn{background:var(--settings-accent);color:white;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:500;transition:all 0.2s;font-size:14px}
+    .settings-btn:hover{opacity:0.9;transform:translateY(-1px)}
+    .settings-btn.secondary{background:transparent;color:var(--settings-accent);border:1px solid rgba(0,0,0,0.06)}
+    .settings-btn.secondary:hover{background:rgba(0,0,0,0.02)}
+
+    .settings-muted{color:var(--settings-muted);font-size:13px}
+    .settings-muted-sm{color:var(--settings-muted);font-size:12px}
+
+    .settings-card{background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);border-radius:12px;padding:12px;border:1px solid rgba(0,0,0,0.03);display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0}
+    .settings-avatar{width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#fff,#eee);display:grid;place-items:center;overflow:hidden;border:1px solid rgba(0,0,0,0.04);flex-shrink:0}
+    .settings-avatar img{width:100%;height:100%;object-fit:cover}
+
+    .settings-toggle{width:44px;height:26px;border-radius:20px;background:#e6e6e6;position:relative;cursor:pointer;transition:all 0.22s}
+    .settings-toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 4px 10px rgba(2,6,23,0.08);transition:all .22s}
+    .settings-toggle.on{background:linear-gradient(90deg,var(--settings-accent),#5a4a39)}
+    .settings-toggle.on .knob{transform:translateX(18px)}
+
+    .settings-list{display:grid;gap:10px}
+    .settings-address-card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);background:var(--settings-card)}
+    .settings-address-row{display:flex;justify-content:space-between;align-items:center;width:100%}
+    .settings-chip{background:rgba(0,0,0,0.04);padding:6px 8px;border-radius:999px;font-size:13px;display:inline-block;margin:4px 4px 4px 0}
+    .settings-divider{height:1px;background:rgba(0,0,0,0.04);margin:12px 0}
+
+    .settings-modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.4);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}
+    .settings-modal-backdrop.show{display:flex}
+    .settings-modal{background:var(--settings-card);padding:18px;border-radius:12px;max-width:640px;width:100%;box-shadow:var(--settings-shadow)}
+    .settings-modal h3{margin:0 0 8px;font-size:16px;color:var(--settings-text)}
+
+    .settings-grid-small{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+    .settings-action-btn{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    .settings-action-btn:hover{background:rgba(0,0,0,0.03)}
+
+    .settings-perm{display:flex;gap:10px;align-items:center;padding:12px;margin:8px 0}
+    .settings-perm .status{font-weight:600;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.04);font-size:12px}
+
+    .settings-storage-bar{height:10px;background:rgba(0,0,0,0.06);border-radius:8px;overflow:hidden;margin:8px 0}
+    .settings-storage-fill{height:100%;background:linear-gradient(90deg,var(--settings-accent),#c7b29a)}
+
+    .settings-toast{position:fixed;right:18px;bottom:18px;z-index:9999;padding:10px 14px;border-radius:10px;background:var(--settings-card);box-shadow:var(--settings-shadow);font-size:13px;animation:slideIn 0.3s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    .settings-icon-btn{background:transparent;border:none;cursor:pointer;padding:4px;color:var(--settings-accent);font-size:14px}
+    .settings-icon-btn:hover{opacity:0.7}
+
+    .settings-page-footer{margin-top:28px;padding-top:14px;font-size:12px;color:var(--settings-muted);text-align:center}
+
+    details summary{cursor:pointer;color:var(--settings-text);font-weight:500;padding:8px 0}
+    details summary:hover{color:var(--settings-accent)}
+    details div{margin-top:8px;color:var(--settings-muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo"><a href="./index.html">ETERNA LUXE</a></div>
+    <form class="site-search" aria-label="Search products">
+      <input type="search" placeholder="Search products" aria-label="Search" />
+      <button type="submit">Search</button>
+    </form>
+    <nav>
+      <ul class="desktop-nav">
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="./product-catalog.html">Catalog</a></li>
+        <li><a href="./about.html">About</a></li>
+        <li><a href="./contact.html">Contact</a></li>
+        <li><a href="./order-tracking.html">Orders</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a class="pill" href="./cart.html">Cart <span class="count-badge" data-cart-count>0</span></a>
+      <a class="pill pill-accent" href="./login.html">Login</a>
+      <div id="hamburger-menu" class="hamburger-menu" aria-label="Toggle menu" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+      <ul id="hamburger-dropdown" class="hamburger-dropdown">
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="./product-catalog.html">Catalog</a></li>
+        <li><a href="./order-tracking.html">Orders</a></li>
+        <li><a href="./login.html">Profile</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="settings-page" data-theme="light">
+    <div class="settings-container" id="app">
+      <!-- SIDEBAR -->
+      <aside class="settings-sidebar" role="navigation" aria-label="Settings navigation">
+        <div class="settings-brand">
+          <div class="logo">EL</div>
+          <div>
+            <h3>Settings</h3>
+            <div class="tagline">Manage your account</div>
+          </div>
+        </div>
+
+        <nav class="settings-nav" id="nav">
+          <button data-tab="account" class="active"><i class="fa-solid fa-user"></i>Account</button>
+          <button data-tab="security"><i class="fa-solid fa-shield-halved"></i>Security</button>
+          <button data-tab="address"><i class="fa-solid fa-location-dot"></i>Addresses</button>
+          <button data-tab="payments"><i class="fa-solid fa-credit-card"></i>Payments</button>
+          <button data-tab="orders"><i class="fa-solid fa-bag-shopping"></i>Orders</button>
+          <button data-tab="notifications"><i class="fa-solid fa-bell"></i>Notifications</button>
+          <button data-tab="appearance"><i class="fa-solid fa-paintbrush"></i>Appearance</button>
+          <button data-tab="region"><i class="fa-solid fa-globe"></i>Region</button>
+          <button data-tab="privacy"><i class="fa-solid fa-user-secret"></i>Privacy</button>
+          <button data-tab="permissions"><i class="fa-solid fa-shield"></i>Permissions</button>
+          <button data-tab="data"><i class="fa-solid fa-database"></i>Data</button>
+          <button data-tab="support"><i class="fa-solid fa-question-circle"></i>Support</button>
+        </nav>
+
+        <div class="help">
+          <div class="settings-muted-sm">Need help? <a href="#" id="openSupport">Contact us</a></div>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <div>
+        <!-- Account -->
+        <section class="settings-panel active" data-panel="account">
+          <h2>Account Information</h2>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+            <div class="settings-avatar" id="avatarPreview"><i class="fa-solid fa-user" style="font-size:28px;color:var(--settings-muted)"></i></div>
+            <div style="flex:1">
+              <div class="settings-field">
+                <label>Profile picture</label>
+                <input type="file" id="profilePic" accept="image/*" style="padding:8px">
+              </div>
+              <div class="settings-cols">
+                <div class="settings-field"><label>Username</label><input id="username" type="text" placeholder="username123"></div>
+                <div class="settings-field"><label>Full name</label><input id="fullname" type="text" placeholder="Jane Doe"></div>
+                <div class="settings-field"><label>Email</label><input id="email" type="email" placeholder="you@example.com"></div>
+                <div class="settings-field"><label>Phone</label><input id="phone" type="tel" placeholder="+1 555 555 5555"></div>
+                <div class="settings-field"><label>Birthday</label><input id="birthday" type="date"></div>
+                <div class="settings-field"><label>Gender</label>
+                  <select id="gender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Non-binary</option></select>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="settings-btn" id="saveProfile">Save profile</button>
+                <button class="settings-btn secondary" id="resetProfile">Reset</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Security -->
+        <section class="settings-panel" data-panel="security">
+          <h2>Login & Security</h2>
+          <div class="settings-card">
+            <div style="display:flex;align-items:center;gap:12px;width:100%">
+              <div style="flex:1"><div style="font-weight:600">Change password</div><div class="settings-muted">Update regularly</div></div>
+              <button class="settings-btn" id="changePasswordBtn">Change</button>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <div class="settings-cols">
+            <div class="settings-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                <div><div style="font-weight:600">Two-step verification</div><div class="settings-muted">Enhance security</div></div>
+                <div class="settings-toggle" id="twofa"><div class="knob"></div></div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                <div><div style="font-weight:600">Recent login activity</div></div>
+                <button class="settings-btn secondary" id="logoutAll">Logout all</button>
+              </div>
+              <div id="deviceList" style="margin-top:10px"></div>
+            </div>
+          </div>
+
+          <div class="settings-divider"></div>
+          <button class="settings-btn secondary" id="deleteAccount" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:#fca5a5">Delete account</button>
+        </section>
+
+        <!-- Address -->
+        <section class="settings-panel" data-panel="address">
+          <h2>Address Book</h2>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="settings-muted">Manage delivery addresses</div>
+            <button class="settings-btn" id="addAddressBtn"><i class="fa-solid fa-plus"></i> Add</button>
+          </div>
+          <div id="addresses" class="settings-list"></div>
+        </section>
+
+        <!-- Payments -->
+        <section class="settings-panel" data-panel="payments">
+          <h2>Payment Methods</h2>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="settings-muted">Save cards for quick checkout</div>
+            <button class="settings-btn" id="addCardBtn"><i class="fa-solid fa-plus"></i> Add card</button>
+          </div>
+          <div id="cards" class="settings-list"></div>
+
+          <div class="settings-divider"></div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <label class="settings-muted-sm">Cash on Delivery preference</label>
+            <div class="settings-toggle" id="codToggle"><div class="knob"></div></div>
+          </div>
+        </section>
+
+        <!-- Orders & Preferences -->
+        <section class="settings-panel" data-panel="orders">
+          <h2>Orders & Shopping</h2>
+          <div class="settings-cols">
+            <div class="settings-field"><label>Default sort</label><select id="defaultSort"><option>Relevance</option><option>Newest</option><option>Price: Low to High</option><option>Price: High to Low</option></select></div>
+            <div class="settings-field"><label>Preferred delivery</label><select id="deliveryMethod"><option>Standard</option><option>Express</option><option>Pickup</option></select></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+            <div class="settings-toggle" id="autoVoucher"><div class="knob"></div></div><div class="settings-muted-sm">Auto-apply vouchers</div>
+          </div>
+          <div class="settings-divider"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div>
+              <label class="settings-muted-sm">Saved searches</label>
+              <div id="savedSearches" class="settings-list"></div>
+            </div>
+            <div>
+              <label class="settings-muted-sm">Wishlist visibility</label>
+              <select id="wishlistVisibility" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"><option>Private</option><option>Friends</option><option>Public</option></select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Notifications -->
+        <section class="settings-panel" data-panel="notifications">
+          <h2>Notifications</h2>
+          <div class="settings-grid-small">
+            <div class="settings-card"><div style="font-weight:600">Order updates</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">SMS & Email</div><div class="settings-toggle" data-pref="orders"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Delivery updates</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">Push & SMS</div><div class="settings-toggle" data-pref="delivery"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Promotions</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">Email</div><div class="settings-toggle" data-pref="promo"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Security alerts</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">Email & Push</div><div class="settings-toggle" data-pref="security"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Messages</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">In-app</div><div class="settings-toggle" data-pref="message"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Push notifications</div><div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><div class="settings-muted-sm">Browser</div><div class="settings-toggle" id="pushPerm"><div class="knob"></div></div></div></div>
+          </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="settings-panel" data-panel="appearance">
+          <h2>Appearance</h2>
+          <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <label class="settings-muted-sm" style="display:block;margin-bottom:8px">Theme</label>
+              <div style="display:flex;gap:8px">
+                <button class="settings-btn" id="lightBtn">Light</button>
+                <button class="settings-btn secondary" id="darkBtn">Dark</button>
+                <button class="settings-btn secondary" id="systemBtn">System</button>
+              </div>
+            </div>
+            <div>
+              <label class="settings-muted-sm" style="display:block;margin-bottom:8px">Accent color</label>
+              <input type="color" id="accentPicker" value="#8b7d6b">
+            </div>
+          </div>
+        </section>
+
+        <!-- Region -->
+        <section class="settings-panel" data-panel="region">
+          <h2>Language & Region</h2>
+          <div class="settings-cols">
+            <div class="settings-field"><label>Language</label><select id="language"><option value="en">English (EN)</option><option value="fil">Filipino</option><option value="es">Spanish</option></select></div>
+            <div class="settings-field"><label>Region</label><select id="region"><option>United States</option><option>Philippines</option><option>United Kingdom</option></select></div>
+            <div class="settings-field"><label>Currency</label><select id="currency"><option>USD</option><option>PHP</option><option>EUR</option></select></div>
+          </div>
+        </section>
+
+        <!-- Privacy -->
+        <section class="settings-panel" data-panel="privacy">
+          <h2>Privacy Settings</h2>
+          <div class="settings-grid-small">
+            <div class="settings-card"><div style="font-weight:600">Hide purchase history</div><div style="margin-top:8px;display:flex;justify-content:space-between"><div class="settings-muted-sm">Activity</div><div class="settings-toggle" id="hidePurchase"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Hide reviews</div><div style="margin-top:8px;display:flex;justify-content:space-between"><div class="settings-muted-sm">Public visibility</div><div class="settings-toggle" id="hideReviews"><div class="knob"></div></div></div></div>
+            <div class="settings-card"><div style="font-weight:600">Personalized ads</div><div style="margin-top:8px;display:flex;justify-content:space-between"><div class="settings-muted-sm">Use data</div><div class="settings-toggle" id="personalizedAds"><div class="knob"></div></div></div></div>
+          </div>
+          <div class="settings-divider"></div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="settings-muted">Allow data & analytics</div>
+            <div class="settings-toggle" id="analyticsToggle"><div class="knob"></div></div>
+          </div>
+        </section>
+
+        <!-- Permissions -->
+        <section class="settings-panel" data-panel="permissions">
+          <h2>App Permissions</h2>
+          <div class="settings-perm"><i class="fa-solid fa-location-dot"></i><div style="flex:1"><div>Location access</div><div class="settings-muted-sm">For delivery coverage</div></div><div class="status" id="permLocation">Unknown</div><button class="settings-action-btn" id="askLocation">Request</button></div>
+          <div class="settings-perm"><i class="fa-solid fa-camera"></i><div style="flex:1"><div>Camera access</div><div class="settings-muted-sm">For profile upload</div></div><div class="status" id="permCamera">Unknown</div><button class="settings-action-btn" id="askCamera">Request</button></div>
+          <div class="settings-perm"><i class="fa-solid fa-bell"></i><div style="flex:1"><div>Notifications</div><div class="settings-muted-sm">Browser push</div></div><div class="status" id="permNotify">Unknown</div><button class="settings-action-btn" id="askNotify">Request</button></div>
+        </section>
+
+        <!-- Data & Storage -->
+        <section class="settings-panel" data-panel="data">
+          <h2>Data & Storage</h2>
+          <div style="display:flex;gap:10px;margin-bottom:12px">
+            <button class="settings-btn" id="downloadData">Download my data</button>
+            <button class="settings-btn secondary" id="clearCacheBtn">Clear cache</button>
+          </div>
+
+          <div class="settings-divider"></div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1">
+              <div class="settings-muted-sm">Storage usage</div>
+              <div class="settings-storage-bar"><div class="settings-storage-fill" id="storageFill"></div></div>
+              <div class="settings-muted-sm" id="storageInfo">Using 2.4GB of 10GB</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Support -->
+        <section class="settings-panel" data-panel="support">
+          <h2>Support & Help</h2>
+          <div style="display:grid;gap:12px">
+            <form id="supportForm" class="settings-card" onsubmit="return false">
+              <h3>Contact Support</h3>
+              <div class="settings-field"><label>Subject</label><input id="supportSubject" type="text" placeholder="Order not received"></div>
+              <div class="settings-field"><label>Message</label><textarea id="supportMessage" rows="4" style="width:100%;padding:10px;border-radius:8px"></textarea></div>
+              <div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="settings-btn" id="sendSupport">Send</button></div>
+              <div id="supportResult" class="settings-muted-sm" style="margin-top:8px"></div>
+            </form>
+
+            <div class="settings-card">
+              <h3>Report an issue</h3>
+              <div class="settings-muted-sm">Provide details and we'll follow up.</div>
+              <div style="margin-top:8px"><button type="button" class="settings-btn secondary" id="reportIssue">Report</button></div>
+            </div>
+
+            <div class="settings-card">
+              <h3>FAQ</h3>
+              <details><summary>How do I change my password?</summary><div>Go to Security → Change password</div></details>
+              <details><summary>How do I download my data?</summary><div>Go to Data & Storage → Download my data</div></details>
+              <details><summary>How do I delete my account?</summary><div>Go to Security and scroll to bottom, click Delete account</div></details>
+            </div>
+          </div>
+        </section>
+
+        <div class="settings-page-footer">ETERNA LUXE • All features are demo-only</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="settings-modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="settings-modal" id="modalContent" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <script src="../js/main.js?v=3"></script>
+  <script>
+    /* Settings page specific logic */
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const local = window.localStorage;
+
+    const defaults = {
+      profile: { username:'jane_doe', fullname:'Jane Doe', email:'jane@eternaluxe.com', phone:'+1 555 0123', birthday:'1990-08-12', gender:'' },
+      addresses: [
+        {id:1,name:'Home',address:'123 Elm Street, Apt 4',city:'San Francisco',zip:'94107',default:true},
+        {id:2,name:'Office',address:'500 Market St',city:'San Francisco',zip:'94103',default:false}
+      ],
+      cards: [
+        {id:1,brand:'Visa',last4:'4242',expiry:'12/25',default:true,billing:'123 Elm Street'},
+        {id:2,brand:'Mastercard',last4:'5555',expiry:'08/26',default:false,billing:'500 Market St'}
+      ],
+      devices:[
+        {id:'d1',label:'Chrome — Windows',when:'Today • 08:12',ip:'192.168.1.8'},
+        {id:'d2',label:'iPhone Safari',when:'Yesterday • 23:00',ip:'192.168.1.11'}
+      ],
+      savedSearches:['Black dress', 'Cashmere sweater'],
+      storage:{usedGB:2.4,limitGB:10}
+    };
+
+    function loadState(){
+      return {
+        profile: JSON.parse(local.getItem('profile') || JSON.stringify(defaults.profile)),
+        addresses: JSON.parse(local.getItem('addresses') || JSON.stringify(defaults.addresses)),
+        cards: JSON.parse(local.getItem('cards') || JSON.stringify(defaults.cards)),
+        devices: JSON.parse(local.getItem('devices') || JSON.stringify(defaults.devices)),
+        savedSearches: JSON.parse(local.getItem('savedSearches') || JSON.stringify(defaults.savedSearches)),
+        storage: JSON.parse(local.getItem('storage') || JSON.stringify(defaults.storage)),
+      };
+    }
+    function saveState(state){
+      local.setItem('profile', JSON.stringify(state.profile));
+      local.setItem('addresses', JSON.stringify(state.addresses));
+      local.setItem('cards', JSON.stringify(state.cards));
+      local.setItem('devices', JSON.stringify(state.devices));
+      local.setItem('savedSearches', JSON.stringify(state.savedSearches));
+      local.setItem('storage', JSON.stringify(state.storage));
+    }
+
+    /* Navigation */
+    $$('#nav button').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        $$('#nav button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        $$('[data-panel]').forEach(p=>p.classList.toggle('active', p.dataset.panel===tab));
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+    });
+
+    const state = loadState();
+
+    function populateProfile(){
+      $('#username').value = state.profile.username;
+      $('#fullname').value = state.profile.fullname;
+      $('#email').value = state.profile.email;
+      $('#phone').value = state.profile.phone;
+      $('#birthday').value = state.profile.birthday;
+      $('#gender').value = state.profile.gender;
+      $('#avatarPreview').innerHTML = '<img src="' + (local.getItem('avatar') || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23efeef5"/><text x="50%" y="55%" text-anchor="middle" font-size="40" fill="%238b7d6b">EL</text></svg>') + '"/>';
+    }
+    populateProfile();
+
+    $('#profilePic').addEventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ local.setItem('avatar', reader.result); populateProfile(); };
+      reader.readAsDataURL(f);
+    });
+
+    $('#saveProfile').addEventListener('click', ()=>{
+      state.profile.username = $('#username').value;
+      state.profile.fullname = $('#fullname').value;
+      state.profile.email = $('#email').value;
+      state.profile.phone = $('#phone').value;
+      state.profile.birthday = $('#birthday').value;
+      state.profile.gender = $('#gender').value;
+      saveState(state);
+      showToast('Profile saved');
+    });
+
+    $('#resetProfile').addEventListener('click', ()=>{
+      Object.assign(state.profile, defaults.profile);
+      saveState(state);
+      populateProfile();
+      showToast('Profile reset');
+    });
+
+    /* Devices & Security */
+    function renderDevices(){
+      const list = $('#deviceList');
+      list.innerHTML = '';
+      state.devices.forEach(d=>{
+        const el = document.createElement('div');
+        el.className = 'settings-card';
+        el.style.marginTop = '8px';
+        el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+          <div><div style="font-weight:600">${d.label}</div><div class="settings-muted-sm">${d.when} • ${d.ip}</div></div>
+          <button class="settings-action-btn" data-id="${d.id}">End</button></div>`;
+        list.appendChild(el);
+      });
+      $$('#deviceList .settings-action-btn').forEach(btn=>{
+        btn.onclick = ()=>{ state.devices = state.devices.filter(x=>x.id!==btn.dataset.id); saveState(state); renderDevices(); showToast('Session ended'); };
+      });
+    }
+    renderDevices();
+
+    function setToggle(el, on){
+      if(on) el.classList.add('on'); else el.classList.remove('on');
+    }
+    const twofaEl = $('#twofa');
+    const twofaOn = local.getItem('twofa') === 'true';
+    setToggle(twofaEl,twofaOn);
+    twofaEl.addEventListener('click', ()=>{ const on = !twofaEl.classList.contains('on'); setToggle(twofaEl,on); local.setItem('twofa',on); showToast('Two-step verification ' + (on?'enabled':'disabled')); });
+
+    $('#logoutAll').addEventListener('click', ()=>{ state.devices=[]; saveState(state); renderDevices(); showToast('All devices logged out'); });
+
+    /* Modals */
+    window.openModal = (html)=>{
+      $('#modalContent').innerHTML = html;
+      $('#modalBackdrop').classList.add('show');
+      $('#modalBackdrop').setAttribute('aria-hidden','false');
+      setTimeout(()=> $('#modalBackdrop').querySelector('input')?.focus(),200);
+    };
+    window.closeModal = ()=>{ $('#modalBackdrop').classList.remove('show'); $('#modalBackdrop').setAttribute('aria-hidden','true'); };
+    $('#modalBackdrop').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+    $('#deleteAccount').addEventListener('click', ()=> openModal(`
+      <h3>Delete account</h3>
+      <div class="settings-muted-sm">This is permanent. Type <strong>DELETE</strong> to confirm.</div>
+      <div style="margin-top:12px"><input id="confirmDelete" placeholder="Type DELETE" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px">
+        <button class="settings-btn secondary" onclick="closeModal()">Cancel</button>
+        <button class="settings-btn" id="confirmDeleteBtn">Delete</button>
+      </div>
+    `));
+
+    document.addEventListener('click', e=>{
+      if(e.target && e.target.id==='confirmDeleteBtn'){
+        const val = $('#confirmDelete').value.trim();
+        if(val==='DELETE'){ local.clear(); showToast('Account deleted'); closeModal(); }
+        else showToast('Please type DELETE');
+      }
+    });
+
+    /* Addresses */
+    function renderAddresses(){
+      const wrap = $('#addresses');
+      wrap.innerHTML = '';
+      state.addresses.forEach(a=>{
+        const el = document.createElement('div');
+        el.className = 'settings-address-card';
+        el.innerHTML = `<div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;width:100%">
+            <div style="flex:1">
+              <div style="display:flex;gap:8px;align-items:center">
+                <div style="font-weight:700">${a.name}</div>
+                ${a.default?'<div class="settings-chip">Default</div>':''}
+              </div>
+              <div class="settings-muted-sm">${a.address}</div>
+              <div class="settings-muted-sm">${a.city} • ${a.zip}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="settings-action-btn" data-edit="${a.id}"><i class="fa-solid fa-pen"></i></button>
+              <button class="settings-action-btn" data-delete="${a.id}"><i class="fa-solid fa-trash"></i></button>
+              <button class="settings-action-btn" data-default="${a.id}"><i class="fa-solid fa-check"></i></button>
+            </div>
+          </div>`;
+        wrap.appendChild(el);
+      });
+      $$('[data-edit]').forEach(b=>b.onclick = ()=> openAddressModal(state.addresses.find(x=>x.id==b.dataset.edit)));
+      $$('[data-delete]').forEach(b=>b.onclick = ()=> { const id=b.dataset.delete; state.addresses = state.addresses.filter(x=>x.id!=id); saveState(state); renderAddresses(); showToast('Deleted'); });
+      $$('[data-default]').forEach(b=>b.onclick = ()=> { const id=b.dataset.default; state.addresses = state.addresses.map(x=>({ ...x, default: String(x.id)===id })); saveState(state); renderAddresses(); showToast('Default set'); });
+    }
+    renderAddresses();
+
+    function openAddressModal(addr){
+      const editing = !!addr;
+      openModal(`
+        <h3>${editing?'Edit':'Add'} address</h3>
+        <div style="display:grid;gap:8px">
+          <input id="addrName" placeholder="Label (Home, Office)" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+          <input id="addrLine" placeholder="Street address" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+          <input id="addrCity" placeholder="City" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+          <input id="addrZip" placeholder="Postal code" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+          <button class="settings-btn secondary" onclick="closeModal()">Cancel</button>
+          <button class="settings-btn" id="saveAddr">${editing?'Save':'Add'}</button>
+        </div>
+      `);
+      if(editing){ $('#addrName').value = addr.name; $('#addrLine').value = addr.address; $('#addrCity').value = addr.city; $('#addrZip').value = addr.zip; }
+      $('#saveAddr').onclick = ()=>{
+        const obj = { id: editing?addr.id:Date.now(), name:$('#addrName').value||'Address', address:$('#addrLine').value, city:$('#addrCity').value, zip:$('#addrZip').value, default: false };
+        if(editing) state.addresses = state.addresses.map(a=> a.id===addr.id?obj:a); else state.addresses.push(obj);
+        saveState(state); renderAddresses(); closeModal(); showToast('Saved');
+      };
+    }
+    $('#addAddressBtn').addEventListener('click', ()=> openAddressModal());
+
+    /* Cards */
+    function renderCards(){
+      const wrap = $('#cards'); wrap.innerHTML='';
+      state.cards.forEach(c=>{
+        const el = document.createElement('div'); el.className='settings-card';
+        el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex:1"><i class="fa-regular fa-credit-card" style="font-size:22px"></i>
+          <div><div style="font-weight:600">${c.brand} • • • • ${c.last4}</div><div class="settings-muted-sm">Expires ${c.expiry}</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><button class="settings-action-btn" data-default="${c.id}">${c.default?'✓':''}</button><button class="settings-action-btn" data-delete="${c.id}"><i class="fa-solid fa-trash"></i></button></div>`;
+        wrap.appendChild(el);
+      });
+      $$('[data-delete]').forEach(b=>b.onclick = ()=>{ state.cards = state.cards.filter(x=>x.id!=b.dataset.delete); saveState(state); renderCards(); showToast('Removed'); });
+      $$('[data-default]').forEach(b=>b.onclick = ()=>{ state.cards = state.cards.map(x=> ({ ...x, default: String(x.id)===b.dataset.default })); saveState(state); renderCards(); showToast('Default set'); });
+    }
+    renderCards();
+
+    $('#addCardBtn').addEventListener('click', ()=> openModal(`
+      <h3>Add card</h3>
+      <div style="display:grid;gap:8px">
+        <input id="cardBrand" placeholder="Card brand (Visa)" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        <input id="cardLast4" placeholder="Last 4 digits" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        <input id="cardExpiry" placeholder="MM/YY" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        <input id="cardBilling" placeholder="Billing address" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+        <button class="settings-btn secondary" onclick="closeModal()">Cancel</button>
+        <button class="settings-btn" id="saveCardBtn">Add</button>
+      </div>
+    `));
+    document.addEventListener('click', (e)=>{
+      if(e.target && e.target.id==='saveCardBtn'){
+        const card = { id:Date.now(), brand:$('#cardBrand').value||'Card', last4:$('#cardLast4').value||'0000', expiry:$('#cardExpiry').value||'--/--', default:false, billing:$('#cardBilling').value||'' };
+        state.cards.push(card); saveState(state); renderCards(); closeModal(); showToast('Card added');
+      }
+    });
+
+    /* Saved searches */
+    function renderSavedSearches(){
+      const wrap = $('#savedSearches'); wrap.innerHTML='';
+      state.savedSearches.forEach((s,i)=>{ const el=document.createElement('div'); el.className='settings-chip'; el.innerHTML = `${s} <button class="settings-icon-btn" data-remove="${i}" style="margin-left:8px;background:none;border:none;padding:0;cursor:pointer">×</button>`; wrap.appendChild(el); });
+      $$('[data-remove]').forEach(b=>b.onclick = (e)=>{ e.preventDefault(); state.savedSearches.splice(parseInt(b.dataset.remove),1); saveState(state); renderSavedSearches(); showToast('Removed'); });
+    }
+    renderSavedSearches();
+
+    /* Notification toggles */
+    $$('.settings-toggle[data-pref]').forEach(t=>{
+      const key = 'notif_'+t.dataset.pref; setToggle(t, local.getItem(key)==='true'); t.addEventListener('click', ()=>{ const v = !t.classList.contains('on'); setToggle(t,v); local.setItem(key,v); showToast('Saved'); });
+    });
+    const pushToggle = $('#pushPerm'); setToggle(pushToggle, Notification && Notification.permission==='granted'); pushToggle.addEventListener('click', async ()=>{
+      if (!('Notification' in window)) return showToast('Not supported');
+      const p = await Notification.requestPermission();
+      setToggle(pushToggle, p==='granted'); showToast('Permission: ' + p);
+    });
+
+    /* Theme */
+    function applyTheme(theme){
+      if(theme==='system'){ document.documentElement.removeAttribute('data-theme'); const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches; document.querySelector('.settings-page').setAttribute('data-theme', dark? 'dark' : 'light'); local.setItem('theme','system'); }
+      else { document.querySelector('.settings-page').setAttribute('data-theme', theme); local.setItem('theme',theme); }
+    }
+    $('#lightBtn').addEventListener('click', ()=> applyTheme('light'));
+    $('#darkBtn').addEventListener('click', ()=> applyTheme('dark'));
+    $('#systemBtn').addEventListener('click', ()=> applyTheme('system'));
+    const accentPicker = $('#accentPicker');
+    accentPicker.addEventListener('input', (e)=>{ document.documentElement.style.setProperty('--settings-accent', e.target.value); local.setItem('accent', e.target.value); });
+    const savedTheme = local.getItem('theme') || 'light';
+    if(savedTheme==='system') applyTheme('system'); else applyTheme(savedTheme);
+
+    /* Language & Region */
+    $('#language').addEventListener('change', ()=> local.setItem('lang', $('#language').value));
+    $('#region').addEventListener('change', ()=> local.setItem('region', $('#region').value));
+    $('#currency').addEventListener('change', ()=> local.setItem('currency', $('#currency').value));
+
+    /* Privacy toggles */
+    ['hidePurchase','hideReviews','personalizedAds','analyticsToggle'].forEach(id=>{
+      const el = $('#'+id);
+      setToggle(el, local.getItem(id)==='true');
+      el.addEventListener('click', ()=>{ const on = !el.classList.contains('on'); setToggle(el,on); local.setItem(id,on); showToast('Saved'); });
+    });
+
+    /* Permissions */
+    async function updatePermStatus(id, name){
+      const el = $(id);
+      try {
+        if(!navigator.permissions) { el.textContent = 'Unavailable'; return; }
+        const p = await navigator.permissions.query({ name });
+        el.textContent = p.state;
+      } catch(e){ el.textContent = 'Unknown'; }
+    }
+    updatePermStatus('#permLocation','geolocation');
+    updatePermStatus('#permCamera','camera');
+    updatePermStatus('#permNotify','notifications');
+    $('#askLocation').addEventListener('click', ()=> navigator.geolocation?.getCurrentPosition(()=> updatePermStatus('#permLocation','geolocation'), ()=> updatePermStatus('#permLocation','geolocation')));
+    $('#askCamera').addEventListener('click', async ()=> {
+      try{ await navigator.mediaDevices.getUserMedia({video:true}); updatePermStatus('#permCamera','camera'); } catch(e){ updatePermStatus('#permCamera','camera'); }
+    });
+    $('#askNotify').addEventListener('click', async ()=> { if(Notification) await Notification.requestPermission(); updatePermStatus('#permNotify','notifications'); });
+
+    /* Data & Storage */
+    function updateStorageUI(){ const s = state.storage; $('#storageFill').style.width = ((s.usedGB/s.limitGB)*100)+'%'; $('#storageInfo').textContent = `Using ${s.usedGB}GB of ${s.limitGB}GB`; }
+    updateStorageUI();
+    $('#downloadData').addEventListener('click', ()=>{
+      const data = { profile: state.profile, addresses: state.addresses, cards: state.cards };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='eternaluxe-data.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); showToast('Downloaded');
+    });
+    $('#clearCacheBtn').addEventListener('click', ()=> { localStorage.clear(); showToast('Cache cleared'); });
+
+    /* Support */
+    $('#sendSupport').addEventListener('click', ()=>{
+      const subj = $('#supportSubject').value.trim();
+      const msg = $('#supportMessage').value.trim();
+      if(!subj || !msg) return $('#supportResult').textContent = 'Fill in fields';
+      $('#supportResult').textContent = 'Sending...';
+      setTimeout(()=> { $('#supportResult').textContent = 'Sent — we will reply'; $('#supportForm').reset(); }, 900);
+    });
+    $('#reportIssue').addEventListener('click', ()=> showToast('Issue reported'));
+
+    /* Change password modal */
+    $('#changePasswordBtn').addEventListener('click', ()=> openModal(`
+      <h3>Change password</h3>
+      <div style="display:grid;gap:8px">
+        <input id="oldPass" type="password" placeholder="Current password" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        <input id="newPass" type="password" placeholder="New password" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+        <input id="newPass2" type="password" placeholder="Confirm password" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+        <button class="settings-btn secondary" onclick="closeModal()">Cancel</button>
+        <button class="settings-btn" id="doChangePass">Save</button>
+      </div>
+    `));
+    document.addEventListener('click', (e)=>{ if(e.target && e.target.id==='doChangePass'){ showToast('Password changed'); closeModal(); } });
+
+    /* Toast notification */
+    function showToast(msg, ms=1400){
+      const t = document.createElement('div'); t.className='settings-toast'; t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=> t.style.opacity='0', ms-300); setTimeout(()=>t.remove(), ms);
+    }
+
+    /* Init */
+    setToggle($('#codToggle'), local.getItem('cod')==='true');
+    $('#codToggle').addEventListener('click', ()=>{ const v=!$('#codToggle').classList.contains('on'); setToggle($('#codToggle'),v); local.setItem('cod',v); showToast('Saved'); });
+    setToggle($('#autoVoucher'), local.getItem('autoVoucher')==='true');
+    $('#autoVoucher').addEventListener('click', ()=>{ const v=!$('#autoVoucher').classList.contains('on'); setToggle($('#autoVoucher'),v); local.setItem('autoVoucher',v); showToast('Saved'); });
+
+    /* Support link in nav */
+    $('#openSupport').addEventListener('click', (e)=>{ e.preventDefault(); $$('#nav button').forEach(b=>b.classList.remove('active')); $('#nav button[data-tab="support"]').classList.add('active'); $$('[data-panel]').forEach(p=>p.classList.remove('active')); $('[data-panel="support"]').classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); });
+
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
+  </script>
+</body>
+</html>

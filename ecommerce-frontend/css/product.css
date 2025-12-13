@@ -1,0 +1,13 @@
+input[type="range"] {
+    accent-color: #7c3aed;
+}
+
+.quick-pill {
+    display: inline-flex;
+    gap: 6px;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    color: #ede9fe;
+    padding: 6px 10px;
+    border-radius: 999px;
+}
