@@ -59,12 +59,15 @@ router.post(
 
 router.get(
   "/",
-  requireRole(ADMIN_ROLE),
-  asyncHandler(async (_req, res) => {
+  asyncHandler(async (req, res) => {
+    const isAdmin = req.user.role === ADMIN_ROLE;
+
     const orders = await prisma.order.findMany({
+      where: isAdmin ? {} : { userId: req.user.id },
       include: { items: true, user: true },
       orderBy: { createdAt: "desc" },
     });
+
     res.json(
       orders.map((order) => ({
         ...order,
