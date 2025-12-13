@@ -1,4 +1,8 @@
 const bcrypt = require("bcryptjs");
+const Prisma = require("@prisma/client");
+
+const prisma = new Prisma.PrismaClient();
+
 const { PrismaClient } = require("@prisma/client");
 
 
@@ -17,6 +21,7 @@ async function main() {
       email: "admin@example.com",
       passwordHash,
       role: "ADMIN",
+
 
       role: UserRole.ADMIN,
     },

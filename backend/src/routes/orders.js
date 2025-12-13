@@ -8,6 +8,7 @@ const ADMIN_ROLE = "ADMIN";
 
 
 
+
 const { OrderStatus, UserRole } = require("@prisma/client");
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.post(
   "/",
   asyncHandler(async (req, res) => {
     const shipping = req.body.shipping ? JSON.stringify(req.body.shipping) : null;
+
 
 
 
@@ -62,6 +64,7 @@ router.post(
     res.status(201).json(response);
 
 
+
     res.status(201).json(order);
   })
 );
@@ -69,6 +72,7 @@ router.post(
 router.get(
   "/",
   requireRole(ADMIN_ROLE),
+
 
 
 
@@ -84,6 +88,7 @@ router.get(
         shipping: order.shipping ? JSON.parse(order.shipping) : null,
       }))
     );
+
 
 
 
@@ -109,6 +114,7 @@ router.get(
 
 
 
+
     const isAdmin = req.user.role === UserRole.ADMIN;
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
@@ -118,6 +124,7 @@ router.get(
       ...order,
       shipping: order.shipping ? JSON.parse(order.shipping) : null,
     });
+
 
 
 
@@ -132,6 +139,7 @@ router.patch(
     const id = Number(req.params.id);
     const { status } = req.body;
     if (!status || !ORDER_STATUSES.includes(status)) {
+
 
 
 
@@ -159,6 +167,7 @@ router.patch(
       ...updated,
       shipping: updated.shipping ? JSON.parse(updated.shipping) : null,
     });
+
 
 
     res.json(updated);
