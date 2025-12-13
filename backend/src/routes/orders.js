@@ -7,6 +7,7 @@ const ORDER_STATUSES = ["PENDING", "PAID", "FULFILLED", "CANCELLED"];
 const ADMIN_ROLE = "ADMIN";
 
 
+
 const { OrderStatus, UserRole } = require("@prisma/client");
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.post(
   "/",
   asyncHandler(async (req, res) => {
     const shipping = req.body.shipping ? JSON.stringify(req.body.shipping) : null;
+
 
 
     const shipping = req.body.shipping || null;
@@ -59,6 +61,7 @@ router.post(
     const response = { ...order, shipping: shipping ? JSON.parse(shipping) : null };
     res.status(201).json(response);
 
+
     res.status(201).json(order);
   })
 );
@@ -66,6 +69,7 @@ router.post(
 router.get(
   "/",
   requireRole(ADMIN_ROLE),
+
 
 
   requireRole(UserRole.ADMIN),
@@ -80,6 +84,7 @@ router.get(
         shipping: order.shipping ? JSON.parse(order.shipping) : null,
       }))
     );
+
 
 
     res.json(orders);
@@ -103,6 +108,7 @@ router.get(
     const isAdmin = req.user.role === ADMIN_ROLE;
 
 
+
     const isAdmin = req.user.role === UserRole.ADMIN;
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ message: "Forbidden" });
@@ -112,6 +118,7 @@ router.get(
       ...order,
       shipping: order.shipping ? JSON.parse(order.shipping) : null,
     });
+
 
 
     res.json(order);
@@ -125,6 +132,7 @@ router.patch(
     const id = Number(req.params.id);
     const { status } = req.body;
     if (!status || !ORDER_STATUSES.includes(status)) {
+
 
 
   requireRole(UserRole.ADMIN),
@@ -151,6 +159,7 @@ router.patch(
       ...updated,
       shipping: updated.shipping ? JSON.parse(updated.shipping) : null,
     });
+
 
     res.json(updated);
   })
