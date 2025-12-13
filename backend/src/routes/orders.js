@@ -72,6 +72,7 @@ router.get(
         user: { select: { id: true, email: true, role: true } },
       },
 
+
       include: { items: true, user: true },
       orderBy: { createdAt: "desc" },
     });
@@ -117,7 +118,6 @@ router.get(
 
 router.patch(
   "/:id/status",
-  requireRole(ADMIN_ROLE),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const { status } = req.body;
@@ -128,6 +128,16 @@ router.patch(
     const order = await prisma.order.findUnique({ where: { id } });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    const isAdmin = req.user?.role === ADMIN_ROLE;
+    const isOwner = req.user?.id === order.userId;
+
+    if (!isAdmin) {
+      const isCancellingOwnOrder = isOwner && status === "CANCELLED";
+      if (!isCancellingOwnOrder) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
     }
 
     const updated = await prisma.order.update({
