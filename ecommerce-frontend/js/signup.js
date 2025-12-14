@@ -30,7 +30,15 @@
         }
 
         try {
-            await apiClient.register(email, password);
+            const user = await apiClient.register(email, password);
+            // Persist a lightweight profile for immediate UI updates (header, account page)
+            try {
+                localStorage.setItem('profile', JSON.stringify({ email: user.email, role: user.role }));
+                const accountDefaults = { email: user.email };
+                localStorage.setItem('accountProfile', JSON.stringify(accountDefaults));
+            } catch (_) {
+                // ignore storage errors
+            }
             setStatus("Account created! Redirecting...", "success");
             setTimeout(() => (window.location.href = "./product-catalog.html"), 800);
         } catch (err) {

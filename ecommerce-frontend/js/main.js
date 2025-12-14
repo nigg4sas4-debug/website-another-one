@@ -79,11 +79,27 @@
         const themeBtn = profileMenu.querySelector("[data-toggle-theme]");
 
         let user = null;
+        const storedProfile = localStorage.getItem('profile');
         if (window.apiClient?.getToken()) {
             try {
                 user = await apiClient.me();
             } catch (_) {
-                // ignore
+                // If the API is unavailable or validation failed, fall back to any
+                // locally stored profile so the UI can still reflect a logged-in state.
+                if (storedProfile) {
+                    try {
+                        user = JSON.parse(storedProfile);
+                        console.warn('hydrateUserNav: using local profile fallback');
+                    } catch (_) {
+                        user = null;
+                    }
+                }
+            }
+        } else if (storedProfile) {
+            try {
+                user = JSON.parse(storedProfile);
+            } catch (_) {
+                user = null;
             }
         }
 

@@ -89,3 +89,28 @@ Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/pr
 - [x] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Add payment endpoints when you are ready to integrate a provider.
+
+Ito na basahin mo pre
+
+
+may mga functionalities na bago pre, yung account, di na pwede yung kahit ano lang, kailangan  mo na magsign up. Tsaka sa admin pre local palang ung accoutn nyan, 'admin@example.com' tapos password ay 'admin123'
+
+Pwede ka na mag add ng mga products pre, tapos mga varianst, tapos kada variant pwede ka maglagay ng stocks sa mga sizes na available then yung price. 
+
+eto pre, kunwari wlaa kang stocks ng xxl size, iwan mo lang na blank, automatic na yun na stock 0 yun.
+
+Tapos kung gusto mo mag sale pre, punta ks sa edit product, piliin mo ung gusto mo iedit pre, tapos andun na yun gmga pwede mmong iedit. 
+Tapos ung sa sale, i check molang ynu pre, tapos lagay mo kung ilng percent yung sale mo. Automatic na calculate yun.
+
+sa taas din pala pre, pwede ka mag add ng categories. wag nalang muna mag delete lalo na pag may nakalagay na "1 products" mahigit, kasi diko alam kung anomangyayari dun.
+
+gumagana naman na ynug manage orders tsaka cancellations pre. Pag binago mo ung status, malilipat ng tab yun, based sa status nya.
+
+!!!!
+sa pag run pala pre
+
+eto
+cd backend
+npm run dev
+
+pag may error pre, kahit i-gemini nalang muna, kasi di ako sure kung paano maayos pag nag error sa pag run
