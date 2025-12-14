@@ -8,10 +8,33 @@ const router = express.Router();
 // populate req.user when a token is present but don't require authentication for public endpoints
 router.use(authenticate(false));
 
+function normalizeProductPayload(body) {
+  const { name, description, price, imageUrl, stock, featured, onSale, discountPct, category } = body;
+  const categoryName = category?.name || category;
+  const safePrice = price == null ? undefined : Number(price);
+  return {
+    name,
+    description: description ?? "",
+    price: safePrice,
+    imageUrl: imageUrl ?? null,
+    stock: stock == null ? undefined : Number(stock),
+    featured: Boolean(featured),
+    onSale: Boolean(onSale),
+    discountPct: discountPct == null ? 0 : Number(discountPct),
+    categoryName: categoryName ? String(categoryName).trim() : undefined,
+  };
+}
+
 router.get(
   "/",
   asyncHandler(async (_req, res) => {
-    const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: true,
+        variations: { include: { sizes: true } },
+      },
+    });
     res.json(products);
   })
 );
@@ -20,7 +43,10 @@ router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const product = await prisma.product.findUnique({ where: { id } });
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true, variations: { include: { sizes: true } } },
+    });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -28,31 +54,72 @@ router.get(
   })
 );
 
+async function resolveCategory(categoryName) {
+  if (!categoryName) return null;
+  return prisma.category.upsert({
+    where: { name: categoryName },
+    update: {},
+    create: { name: categoryName },
+  });
+}
+
+async function replaceVariations(productId, variations = []) {
+  await prisma.productVariation.deleteMany({ where: { productId } });
+  if (!Array.isArray(variations) || variations.length === 0) return;
+  for (const variation of variations) {
+    await prisma.productVariation.create({
+      data: {
+        name: variation.name || "Default",
+        productId,
+        sizes: {
+          create: (variation.sizes || []).map((size) => ({
+            label: size.label || "OS",
+            price: Number(size.price ?? 0),
+            stock: Number(size.stock ?? 0),
+          })),
+        },
+      },
+    });
+  }
+}
+
 // Admin: create a product
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    // simple admin check should be applied by route mounting or middleware; check here conservatively
     if (!req.user || req.user.role !== "ADMIN") {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    const { name, description, price, imageUrl, stock } = req.body;
-    if (!name || price == null) {
+    const payload = normalizeProductPayload(req.body);
+    if (!payload.name || payload.price == null) {
       return res.status(400).json({ message: "Name and price are required" });
     }
 
+    const category = await resolveCategory(payload.categoryName);
+
     const product = await prisma.product.create({
       data: {
-        name,
-        description: description || "",
-        price: Number(price),
-        imageUrl: imageUrl || null,
-        stock: Number(stock) || 0,
+        name: payload.name,
+        description: payload.description,
+        price: payload.price,
+        imageUrl: payload.imageUrl,
+        stock: payload.stock || 0,
+        featured: payload.featured,
+        onSale: payload.onSale,
+        discountPct: payload.discountPct,
+        categoryId: category?.id ?? null,
       },
     });
 
-    res.status(201).json(product);
+    await replaceVariations(product.id, req.body.variations);
+
+    const withRelations = await prisma.product.findUnique({
+      where: { id: product.id },
+      include: { category: true, variations: { include: { sizes: true } } },
+    });
+
+    res.status(201).json(withRelations);
   })
 );
 
@@ -65,20 +132,35 @@ router.patch(
     }
 
     const id = Number(req.params.id);
-    const { name, description, price, imageUrl, stock } = req.body;
+    const payload = normalizeProductPayload(req.body);
 
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: "Product not found" });
 
-    const updated = await prisma.product.update({
+    const category = payload.categoryName ? await resolveCategory(payload.categoryName) : null;
+
+    await prisma.product.update({
       where: { id },
       data: {
-        name: name ?? existing.name,
-        description: description ?? existing.description,
-        price: price == null ? existing.price : Number(price),
-        imageUrl: imageUrl === undefined ? existing.imageUrl : imageUrl,
-        stock: stock == null ? existing.stock : Number(stock),
+        name: payload.name ?? existing.name,
+        description: payload.description ?? existing.description,
+        price: payload.price == null ? existing.price : payload.price,
+        imageUrl: payload.imageUrl === undefined ? existing.imageUrl : payload.imageUrl,
+        stock: payload.stock == null ? existing.stock : payload.stock,
+        featured: payload.featured ?? existing.featured,
+        onSale: payload.onSale ?? existing.onSale,
+        discountPct: payload.discountPct ?? existing.discountPct,
+        categoryId: category ? category.id : payload.categoryName === null ? null : existing.categoryId,
       },
+    });
+
+    if (Array.isArray(req.body.variations)) {
+      await replaceVariations(id, req.body.variations);
+    }
+
+    const updated = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true, variations: { include: { sizes: true } } },
     });
 
     res.json(updated);

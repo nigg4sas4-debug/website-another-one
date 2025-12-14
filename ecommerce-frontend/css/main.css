@@ -329,9 +329,31 @@ main {
     align-items: center;
 }
 
+.price-group {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
 .price {
     font-weight: 700;
     font-size: 1.2rem;
+}
+
+.price.sale {
+    color: var(--accent);
+}
+
+.price.original {
+    text-decoration: line-through;
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.pill-sale {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
 }
 
 .rating {
