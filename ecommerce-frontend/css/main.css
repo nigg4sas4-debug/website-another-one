@@ -329,9 +329,31 @@ main {
     align-items: center;
 }
 
+.price-group {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
 .price {
     font-weight: 700;
     font-size: 1.2rem;
+}
+
+.price.sale {
+    color: var(--accent);
+}
+
+.price.original {
+    text-decoration: line-through;
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.pill-sale {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
 }
 
 .rating {
@@ -767,12 +789,31 @@ main {
     margin-left: 8px;
 }
 
+.admin-list {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-card .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.stacked.inline {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
 .variation-list {
     display: grid;
     gap: 12px;
 }
 
-.variation-row {
+.variation-block {
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 12px;
@@ -781,15 +822,61 @@ main {
     gap: 10px;
 }
 
+.variation-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.size-list {
+    display: grid;
+    gap: 10px;
+}
+
+.size-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) max-content;
+    gap: 10px;
+    align-items: end;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-2);
+}
+
 .variation-actions {
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
 }
 
-.variation-grid {
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.inventory-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
+    gap: 12px;
+}
+
+.inventory-row {
+    display: grid;
+    grid-template-columns: 2fr repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
 }
 
 .tab-list {

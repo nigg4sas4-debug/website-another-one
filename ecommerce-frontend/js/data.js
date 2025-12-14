@@ -55,17 +55,12 @@ async function apiRequest(path, options = {}) {
 
 function normalizeProduct(product) {
     const image = product.imageUrl || ImageFactory.createPlaceholder(product.name || "Product");
-    return {
-        id: String(product.id),
-        name: product.name,
-        description: product.description,
-        category: product.category || "Essentials",
-        price: product.price,
-        rating: product.rating || 4.5,
-        featured: product.featured ?? true,
-        available: (product.stock ?? 0) > 0,
-        badges: product.badges || [],
-        variations: [
+    const baseCategory = product.category?.name || product.category || "Essentials";
+    const discountPct = Number(product.discountPct ?? 0);
+    const onSale = discountPct > 0 || Boolean(product.onSale);
+    const variations = (product.variations || []).length
+        ? product.variations
+        : [
             {
                 name: "Default",
                 image,
@@ -78,7 +73,41 @@ function normalizeProduct(product) {
                     },
                 ],
             },
-        ],
+        ];
+
+    const enrichedVariations = variations.map((variation) => ({
+        ...variation,
+        image: variation.image || image,
+        gallery: variation.gallery || [image],
+        sizes: (variation.sizes || []).map((size) => {
+            const originalPrice = Number(size.price ?? product.price ?? 0);
+            const finalPrice = discountPct > 0 ? originalPrice * (1 - discountPct / 100) : originalPrice;
+            return {
+                ...size,
+                price: finalPrice,
+                originalPrice,
+                stock: Number(size.stock ?? 0),
+            };
+        }),
+    }));
+
+    const inStock = enrichedVariations.some((variation) =>
+        (variation.sizes || []).some((size) => Number(size.stock) > 0)
+    );
+
+    return {
+        id: String(product.id),
+        name: product.name,
+        description: product.description,
+        category: baseCategory,
+        price: product.price,
+        rating: product.rating || 4.5,
+        featured: product.featured ?? false,
+        available: inStock,
+        badges: product.badges || [],
+        onSale,
+        discountPct,
+        variations: enrichedVariations,
     };
 }
 
@@ -146,6 +175,21 @@ const apiClient = {
         const order = await apiRequest("/orders", { method: "POST", body: JSON.stringify({ shipping }) });
         return order;
     },
+    async listCategories() {
+        return apiRequest("/categories", { method: "GET" });
+    },
+    async createCategory(name) {
+        return apiRequest("/categories", { method: "POST", body: JSON.stringify({ name }) });
+    },
+    async updateCategory(id, name) {
+        return apiRequest(`/categories/${id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+    },
+    async deleteCategory(id) {
+        return apiRequest(`/categories/${id}`, { method: "DELETE" });
+    },
+    async updateSize(id, payload) {
+        return apiRequest(`/products/sizes/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+    },
     async listOrders() {
         const orders = await apiRequest("/orders", { method: "GET" });
         return orders;
@@ -153,11 +197,17 @@ const apiClient = {
     async getOrder(id) {
         return apiRequest(`/orders/${id}`, { method: "GET" });
     },
-    async cancelOrder(id) {
-        return apiRequest(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status: "CANCELLED" }) });
+    async cancelOrder(id, reason) {
+        return apiRequest(`/orders/${id}/cancellation`, { method: "POST", body: JSON.stringify({ reason }) });
     },
     async updateOrderStatus(id, status) {
         return apiRequest(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+    },
+    async listCancellations() {
+        return apiRequest(`/orders/cancellations`, { method: "GET" });
+    },
+    async updateCancellation(id, status) {
+        return apiRequest(`/orders/cancellations/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
     },
 };
 
