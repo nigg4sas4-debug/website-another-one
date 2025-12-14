@@ -14,10 +14,12 @@
     const base64ImageHidden = document.getElementById("base64-image-hidden");
     const variationList = document.getElementById("variation-list");
     const addVariationBtn = document.getElementById("add-variation");
+    const trashList = document.getElementById("trash-list");
 
     let cachedProducts = [];
     let cachedCategories = [];
     let cachedCancellations = [];
+    let cachedTrashed = [];
 
     window.closeEditModal = () => {
         document.getElementById('edit-product-modal')?.remove();
@@ -225,7 +227,7 @@
                 <article class="product-row" data-product-id="${product.id}">
                     <div>
                         <strong>${product.name}</strong>
-                        <p class="muted">${product.category?.name || 'Uncategorized'}</p>
+                        <p class="muted">${product.category?.name || product.category || 'Uncategorized'}</p>
                     </div>
                     <div class="pill">Stock: ${product.variations?.flatMap(v => v.sizes || []).reduce((s, sz) => s + (Number(sz.stock) || 0), 0)}</div>
                     <div class="price">${window.getPriceRange?.(product)}</div>
@@ -237,20 +239,27 @@
     }
 
     function openEditProductModal(product) {
-    const modalHtml = `
+        const modalHtml = `
     <div class="modal-overlay show" id="edit-product-modal">
-        <div class="modal" style="max-width: 800px; overflow-y: auto; max-height: 90vh;">
-            <header>
-                <h2>Edit Product</h2>
-                <button class="link" onclick="closeEditModal()">Close</button>
+        <div class="modal elevated" style="max-width: 860px; overflow-y: auto; max-height: 90vh;">
+            <header class="modal-head">
+                <div>
+                    <p class="eyebrow">Editing</p>
+                    <h2>${product.name}</h2>
+                    <p class="muted">Organized variations, fast stock tweaks, and lifecycle actions.</p>
+                </div>
+                <div class="modal-head__actions">
+                    <button type="button" class="btn danger ghost" id="soft-delete-product">Move to trash</button>
+                    <button class="btn ghost" type="button" onclick="closeEditModal()">Close</button>
+                </div>
             </header>
-            <form id="edit-product-form" class="stacked">
+            <form id="edit-product-form" class="stacked sleek-form">
                 <input type="hidden" name="productId" value="${product.id}">
                 <div class="grid-2">
                     <label>Name<input required name="name" type="text" value="${product.name}"></label>
                     <label>Category
                         <select name="category">
-                            ${cachedCategories.map(cat => `<option value="${cat.name}" ${product.category?.name === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                            ${cachedCategories.map(cat => `<option value="${cat.name}" ${product.category?.name === cat.name || product.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
                         </select>
                     </label>
                 </div>
@@ -292,40 +301,40 @@
     </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-    window.closeEditModal = () => {
-        document.getElementById('edit-product-modal')?.remove();
-    }
-
-    const modal = document.getElementById('edit-product-modal');
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            closeEditModal();
+        window.closeEditModal = () => {
+            document.getElementById('edit-product-modal')?.remove();
         }
-    });
 
-    const editForm = document.getElementById('edit-product-form');
+        const modal = document.getElementById('edit-product-modal');
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        });
 
-    editForm.addEventListener('click', (event) => {
-        const target = event.target;
-        if(target.dataset.addSize) {
-            const sizeList = target.closest('.variation-card').querySelector('.size-list');
-            sizeList.appendChild(createSizeRow());
-        }
-        if(target.dataset.removeSize) {
-            target.closest('.size-row').remove();
-        }
-        if(target.dataset.removeVariation) {
-            target.closest('.variation-card').remove();
-        }
-    });
+        const editForm = document.getElementById('edit-product-form');
 
-    document.getElementById('add-edit-variation').addEventListener('click', () => {
-        const variationList = document.getElementById('edit-variation-list');
-        const block = document.createElement("div");
-        block.className = "variation-card";
-        block.innerHTML = `
+        editForm.addEventListener('click', (event) => {
+            const target = event.target;
+            if(target.dataset.addSize) {
+                const sizeList = target.closest('.variation-card').querySelector('.size-list');
+                sizeList.appendChild(createSizeRow());
+            }
+            if(target.dataset.removeSize) {
+                target.closest('.size-row').remove();
+            }
+            if(target.dataset.removeVariation) {
+                target.closest('.variation-card').remove();
+            }
+        });
+
+        document.getElementById('add-edit-variation').addEventListener('click', () => {
+            const variationList = document.getElementById('edit-variation-list');
+            const block = document.createElement("div");
+            block.className = "variation-card";
+            block.innerHTML = `
             <label>Variation Name<input name="variation-name" value="New Variation"></label>
             <div class="size-list">
                 ${createSizeRow({label: 'S'}).outerHTML}
@@ -335,46 +344,57 @@
                 <button type="button" class="btn danger ghost" data-remove-variation>Remove Variation</button>
             </div>
         `;
-        variationList.appendChild(block);
-    });
-
-    editForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(editForm);
-        const productId = fd.get('productId');
-        const name = fd.get('name');
-        const description = fd.get('description');
-        const category = fd.get('category');
-        const featured = fd.get('featured') === 'on';
-        const onSale = fd.get('sale') === 'on';
-        const discountPct = onSale ? Number(fd.get('discountPct') || 0) : 0;
-
-        const variations = Array.from(document.querySelectorAll('#edit-variation-list .variation-card')).map(card => {
-            const variationName = card.querySelector('input[name="variation-name"]').value;
-            const sizes = Array.from(card.querySelectorAll('.size-row')).map(row => ({
-                label: row.querySelector('input[name="size-label"]').value,
-                price: Number(row.querySelector('input[name="size-price"]').value || 0)
-            }));
-            return { name: variationName, sizes };
+            variationList.appendChild(block);
         });
 
-        try {
-            await apiClient.updateProduct(productId, {
-                name,
-                description,
-                categoryName: category,
-                featured,
-                onSale,
-                discountPct,
-                variations
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(editForm);
+            const productId = fd.get('productId');
+            const name = fd.get('name');
+            const description = fd.get('description');
+            const category = fd.get('category');
+            const featured = fd.get('featured') === 'on';
+            const onSale = fd.get('sale') === 'on';
+            const discountPct = onSale ? Number(fd.get('discountPct') || 0) : 0;
+
+            const variations = Array.from(document.querySelectorAll('#edit-variation-list .variation-card')).map(card => {
+                const variationName = card.querySelector('input[name="variation-name"]').value;
+                const sizes = Array.from(card.querySelectorAll('.size-row')).map(row => ({
+                    label: row.querySelector('input[name="size-label"]').value,
+                    price: Number(row.querySelector('input[name="size-price"]').value || 0)
+                }));
+                return { name: variationName, sizes };
             });
-            await loadProducts();
-            closeEditModal();
-        } catch (err) {
-            alert('Failed to update product: ' + err.message);
-        }
-    });
-}
+
+            try {
+                await apiClient.updateProduct(productId, {
+                    name,
+                    description,
+                    categoryName: category,
+                    featured,
+                    onSale,
+                    discountPct,
+                    variations
+                });
+                await loadProducts();
+                closeEditModal();
+            } catch (err) {
+                alert('Failed to update product: ' + err.message);
+            }
+        });
+
+        document.getElementById('soft-delete-product').addEventListener('click', async () => {
+            if (!confirm('Move this product to trash? It can be restored within 7 days.')) return;
+            try {
+                await apiClient.deleteProduct(product.id);
+                await Promise.all([loadProducts(), loadTrashed()]);
+                closeEditModal();
+            } catch (err) {
+                alert('Failed to move to trash: ' + err.message);
+            }
+        });
+    }
 
     document.querySelector('.admin-content')?.addEventListener('click', (event) => {
         const target = event.target;
@@ -391,32 +411,97 @@
         }
     });
 
+    function renderTrash() {
+        if (!trashList) return;
+        if (!cachedTrashed.length) {
+            trashList.innerHTML = `<p class="muted">Trash is empty. Deleted items stay for 7 days.</p>`;
+            return;
+        }
+
+        trashList.innerHTML = cachedTrashed
+            .map((product) => {
+                const deletedAt = product.deletedAt ? new Date(product.deletedAt) : null;
+                const msLeft = deletedAt ? Math.max(0, (deletedAt.getTime() + 7 * 24 * 60 * 60 * 1000) - Date.now()) : 0;
+                const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+                return `
+                <article class="product-row trashed" data-product-id="${product.id}">
+                    <div>
+                        <strong>${product.name}</strong>
+                        <p class="muted">${product.category?.name || product.category || 'Uncategorized'}</p>
+                        <p class="muted">Removed ${deletedAt ? deletedAt.toLocaleString() : ''}</p>
+                    </div>
+                    <div class="pill">Expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}</div>
+                    <div class="row-actions">
+                        <button class="btn ghost" data-restore>Restore</button>
+                        <button class="btn danger ghost" data-purge>Purge</button>
+                    </div>
+                </article>`;
+            })
+            .join("");
+    }
+
     function renderInventory() {
         if (!inventoryGrid) return;
         if (!cachedProducts.length) {
             inventoryGrid.innerHTML = `<p class="muted">No inventory to manage.</p>`;
             return;
         }
-        const rows = [];
-        cachedProducts.forEach((product) => {
-            (product.variations || []).forEach((variation) => {
-                (variation.sizes || []).forEach((size) => {
-                    const displayPrice = size.originalPrice ?? size.price ?? 0;
-                    rows.push(`
-                        <article class="inventory-row" data-size-id="${size.id}">
-                            <div>
-                                <strong>${product.name}</strong>
-                                <p class="muted">${variation.name} · ${size.label}</p>
-                            </div>
-                            <label>Stock<input type="number" min="0" value="${size.stock}" data-stock-input></label>
-                            <label>Price<input type="number" min="0" step="0.01" value="${displayPrice}" data-price-input></label>
-                            <button type="button" class="btn ghost" data-update-size>Update</button>
-                        </article>
-                    `);
-                });
-            });
+
+        const productCards = cachedProducts.map((product) => {
+            const totalStock = (product.variations || [])
+                .flatMap((variation) => variation.sizes || [])
+                .reduce((sum, size) => sum + Number(size.stock || 0), 0);
+
+            const variationsHtml = (product.variations || [])
+                .map((variation) => {
+                    const sizesHtml = (variation.sizes || [])
+                        .map((size) => {
+                            const displayPrice = size.originalPrice ?? size.price ?? 0;
+                            return `
+                                <div class="inventory-size-row" data-size-id="${size.id}">
+                                    <div class="size-meta">
+                                        <span class="pill">${variation.name}</span>
+                                        <strong>${size.label}</strong>
+                                    </div>
+                                    <div class="size-inputs">
+                                        <label>Stock<input type="number" min="0" value="${size.stock}" data-stock-input></label>
+                                        <label>Price<input type="number" min="0" step="0.01" value="${displayPrice}" data-price-input></label>
+                                    </div>
+                                </div>
+                            `;
+                        })
+                        .join("");
+
+                    return `
+                        <div class="inventory-variation">
+                            <div class="inventory-variation__title">${variation.name}</div>
+                            <div class="inventory-sizes">${sizesHtml}</div>
+                        </div>
+                    `;
+                })
+                .join("");
+
+            return `
+                <article class="inventory-card" data-product-id="${product.id}">
+                    <header class="inventory-card__head">
+                        <div>
+                            <strong>${product.name}</strong>
+                            <p class="muted">${product.category || "Uncategorized"}</p>
+                        </div>
+                        <div class="inventory-card__meta">
+                            <span class="pill">Total stock: ${totalStock}</span>
+                            <span class="price">${window.getPriceRange?.(product)}</span>
+                        </div>
+                    </header>
+                    <div class="inventory-variations">${variationsHtml}</div>
+                    <div class="inventory-card__actions">
+                        <button type="button" class="btn ghost" data-update-product>Update stock</button>
+                    </div>
+                </article>
+            `;
         });
-        inventoryGrid.innerHTML = rows.join("");
+
+        inventoryGrid.innerHTML = productCards.join("");
     }
 
     async function loadProducts() {
@@ -425,8 +510,19 @@
             renderProducts();
             renderInventory();
             renderProductsForEdit();
+            await loadTrashed();
         } catch (err) {
             if (productList) productList.innerHTML = `<p class="muted">Unable to load products: ${err.message}</p>`;
+        }
+    }
+
+    async function loadTrashed() {
+        if (!trashList) return;
+        try {
+            cachedTrashed = await apiClient.listTrashedProducts();
+            renderTrash();
+        } catch (err) {
+            trashList.innerHTML = `<p class="muted">Unable to load trash: ${err.message}</p>`;
         }
     }
 
@@ -548,18 +644,65 @@
     inventoryGrid?.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        if ('updateSize' in target.dataset) {
-            const row = target.closest("[data-size-id]");            const id = row?.dataset.sizeId;
-            const stockInput = row?.querySelector("[data-stock-input]");
-            const priceInput = row?.querySelector("[data-price-input]");
+        const button = target.closest("[data-update-product]");
+        if (!button) return;
+
+        const card = button.closest("[data-product-id]");
+        if (!card) return;
+
+        const sizeRows = Array.from(card.querySelectorAll("[data-size-id]"));
+        const updates = sizeRows.map((row) => {
+            const id = row.dataset.sizeId;
+            const stockInput = row.querySelector("[data-stock-input]");
+            const priceInput = row.querySelector("[data-price-input]");
+            return apiClient.updateSize(id, {
+                stock: Number(stockInput?.value || 0),
+                price: Number(priceInput?.value || 0),
+            });
+        });
+
+        button.disabled = true;
+        button.textContent = "Updating...";
+        try {
+            await Promise.all(updates);
+            await loadProducts();
+        } catch (err) {
+            alert(`Unable to update inventory: ${err.message}`);
+        } finally {
+            button.disabled = false;
+            button.textContent = "Update stock";
+        }
+    });
+
+    trashList?.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const row = target.closest("[data-product-id]");
+        if (!row) return;
+        const productId = row.dataset.productId;
+
+        if (target.dataset.restore) {
+            target.disabled = true;
             try {
-                await apiClient.updateSize(id, {
-                    stock: Number(stockInput.value || 0),
-                    price: Number(priceInput.value || 0),
-                });
-                await loadProducts();
+                await apiClient.restoreProduct(productId);
+                await Promise.all([loadProducts(), loadTrashed()]);
             } catch (err) {
-                alert(`Unable to update inventory: ${err.message}`);
+                alert(`Unable to restore product: ${err.message}`);
+            } finally {
+                target.disabled = false;
+            }
+        }
+
+        if (target.dataset.purge) {
+            if (!confirm("Permanently delete this product? This cannot be undone.")) return;
+            target.disabled = true;
+            try {
+                await apiClient.permanentlyDeleteProduct(productId);
+                await loadTrashed();
+            } catch (err) {
+                alert(`Unable to delete product: ${err.message}`);
+            } finally {
+                target.disabled = false;
             }
         }
     });

@@ -8,6 +8,20 @@ const router = express.Router();
 // populate req.user when a token is present but don't require authentication for public endpoints
 router.use(authenticate(false));
 
+const TRASH_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+
+async function purgeExpiredTrashedProducts() {
+  const cutoff = new Date(Date.now() - TRASH_TTL_MS);
+  await prisma.product.deleteMany({
+    where: { deletedAt: { lt: cutoff } },
+  });
+}
+
+// run cleanup periodically (no-op if nothing to purge)
+setInterval(() => {
+  purgeExpiredTrashedProducts().catch((err) => console.error("Trash purge failed", err));
+}, 1000 * 60 * 30);
+
 function normalizeProductPayload(body) {
   const { name, description, price, imageUrl, base64Image, stock, featured, onSale, discountPct, category } = body;
   const categoryName = category?.name || category;
@@ -34,7 +48,9 @@ function coerceNumber(value, fallback = 0) {
 router.get(
   "/",
   asyncHandler(async (_req, res) => {
+    await purgeExpiredTrashedProducts();
     const products = await prisma.product.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
@@ -45,12 +61,28 @@ router.get(
   })
 );
 
+// Admin: view trashed products (and purge expired entries)
+router.get(
+  "/trash",
+  requireRole("ADMIN"),
+  asyncHandler(async (_req, res) => {
+    await purgeExpiredTrashedProducts();
+    const trashed = await prisma.product.findMany({
+      where: { deletedAt: { not: null } },
+      include: { category: true, variations: { include: { sizes: true } } },
+      orderBy: { deletedAt: "desc" },
+    });
+
+    res.json(trashed);
+  })
+);
+
 router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const product = await prisma.product.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       include: { category: true, variations: { include: { sizes: true } } },
     });
     if (!product) {
@@ -144,7 +176,7 @@ router.patch(
     const payload = normalizeProductPayload(req.body);
 
     const existing = await prisma.product.findUnique({ where: { id } });
-    if (!existing) return res.status(404).json({ message: "Product not found" });
+    if (!existing || existing.deletedAt) return res.status(404).json({ message: "Product not found" });
 
     const category = payload.categoryName ? await resolveCategory(payload.categoryName) : null;
 
@@ -177,7 +209,58 @@ router.patch(
       include: { category: true, variations: { include: { sizes: true } } },
     });
 
-    res.json(updated);
+  res.json(updated);
+})
+);
+
+// Admin: move product to trash (soft delete)
+router.patch(
+  "/:id/delete",
+  requireRole("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Product not found" });
+
+    const trashed = await prisma.product.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    res.json(trashed);
+  })
+);
+
+// Admin: restore a trashed product
+router.patch(
+  "/:id/restore",
+  requireRole("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Product not found" });
+
+    const restored = await prisma.product.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: { category: true, variations: { include: { sizes: true } } },
+    });
+
+    res.json(restored);
+  })
+);
+
+// Admin: permanently delete a trashed product
+router.delete(
+  "/:id",
+  requireRole("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ message: "Product not found" });
+
+    await prisma.product.delete({ where: { id } });
+    res.json({ ok: true });
   })
 );
 

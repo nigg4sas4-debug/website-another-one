@@ -45,6 +45,7 @@ model Product {
   featured    Boolean     @default(false)
   onSale      Boolean     @default(false)
   discountPct Int         @default(0)
+  deletedAt   DateTime?
   category    Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId  Int?
   createdAt   DateTime    @default(now())

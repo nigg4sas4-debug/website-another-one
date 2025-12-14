@@ -107,6 +107,7 @@ function normalizeProduct(product) {
         badges: product.badges || [],
         onSale,
         discountPct,
+        deletedAt: product.deletedAt || null,
         variations: enrichedVariations,
     };
 }
@@ -154,9 +155,22 @@ const apiClient = {
     async updateProduct(id, payload) {
         return apiRequest(`/products/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
     },
+    async deleteProduct(id) {
+        return apiRequest(`/products/${id}/delete`, { method: "PATCH" });
+    },
+    async restoreProduct(id) {
+        return apiRequest(`/products/${id}/restore`, { method: "PATCH" });
+    },
+    async permanentlyDeleteProduct(id) {
+        return apiRequest(`/products/${id}`, { method: "DELETE" });
+    },
     async getProduct(id) {
         const product = await apiRequest(`/products/${id}`, { method: "GET" });
         return normalizeProduct(product);
+    },
+    async listTrashedProducts() {
+        const products = await apiRequest("/products/trash", { method: "GET" });
+        return products.map(normalizeProduct);
     },
     async getCart() {
         const cart = await apiRequest("/cart", { method: "GET" });
