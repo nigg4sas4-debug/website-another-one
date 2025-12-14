@@ -285,12 +285,16 @@ twofaEl.addEventListener('click', () => {
 /**
  * Logout all devices
  */
-$('#logoutAll').addEventListener('click', () => {
-  state.devices = [];
-  saveState(state);
-  renderDevices();
-  showToast('All devices logged out');
-});
+$('#logoutAll').addEventListener('click', () =>
+  openModal(`
+    <h3>Logout from all devices</h3>
+    <p>Are you sure you want to end all other login sessions?</p>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+      <button class="settings-btn secondary" onclick="closeModal()">Cancel</button>
+      <button class="settings-btn" id="confirmLogoutAll">Logout</button>
+    </div>
+  `)
+);
 
 /**
  * Delete account modal with confirmation
@@ -986,3 +990,13 @@ $('#modalBackdrop').addEventListener('click', (e) => {
 console.log('✅ Settings page initialized with full functionality');
 console.log('📊 Loaded state:', state);
 console.log('💾 LocalStorage keys:', Object.keys(localStorage));
+
+document.addEventListener('click', (e) => {
+  if (e.target?.id === 'confirmLogoutAll') {
+    state.devices = [];
+    saveState(state);
+    renderDevices();
+    showToast('All devices logged out');
+    closeModal();
+  }
+});

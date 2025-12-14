@@ -58,8 +58,6 @@ function normalizeProduct(product) {
     const baseCategory = product.category?.name || product.category || "Essentials";
     const discountPct = Number(product.discountPct ?? 0);
     const onSale = discountPct > 0 || Boolean(product.onSale);
-    const discountPct = Number(product.discountPct || 0);
-    const onSale = Boolean(product.onSale) && discountPct > 0;
     const variations = (product.variations || []).length
         ? product.variations
         : [
@@ -83,7 +81,6 @@ function normalizeProduct(product) {
         gallery: variation.gallery || [image],
         sizes: (variation.sizes || []).map((size) => {
             const originalPrice = Number(size.price ?? product.price ?? 0);
-            const finalPrice = discountPct > 0 ? originalPrice * (1 - discountPct / 100) : originalPrice;
             const finalPrice = onSale ? originalPrice * (1 - discountPct / 100) : originalPrice;
             return {
                 ...size,
@@ -153,6 +150,9 @@ const apiClient = {
     async createProduct(payload) {
         const product = await apiRequest("/products", { method: "POST", body: JSON.stringify(payload) });
         return product;
+    },
+    async updateProduct(id, payload) {
+        return apiRequest(`/products/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
     },
     async getProduct(id) {
         const product = await apiRequest(`/products/${id}`, { method: "GET" });

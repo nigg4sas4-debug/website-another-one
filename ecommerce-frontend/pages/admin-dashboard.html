@@ -71,7 +71,11 @@
             <form id="product-form" class="stacked">
                 <div class="grid-2">
                     <label>Name<input required name="name" type="text" placeholder="Product name"></label>
-                    <label>Product Image URL<input name="imageUrl" type="url" placeholder="https://.../image.png"></label>
+                    <label>Product Image<input id="product-image-upload" name="imageUpload" type="file" accept="image/*"></label>
+                    <div class="product-image-preview">
+                        <img id="product-image-preview" src="" alt="Image Preview" class="hidden">
+                        <input type="hidden" name="base64Image" id="base64-image-hidden">
+                    </div>
                 </div>
                 <div class="grid-2">
                     <label>Category
@@ -79,13 +83,8 @@
                             <option value="">Select a category</option>
                         </select>
                     </label>
-                    <label>Featured<input name="featured" type="checkbox"></label>
                 </div>
                 <label>Description<textarea name="description" placeholder="Detail the fabric, fit, and care"></textarea></label>
-                <div class="grid-2">
-                    <label class="checkbox-inline"><input id="product-sale" name="sale" type="checkbox"> Sale</label>
-                    <label id="discount-wrapper" class="hidden">Discount %<input id="discount-pct" name="discountPct" type="number" min="0" max="90" step="1" placeholder="10"></label>
-                </div>
                 <div>
                     <div class="section-subhead">
                         <h3>Variations & sizes</h3>
@@ -98,6 +97,17 @@
                 </div>
                 <button class="btn" type="submit">Add product</button>
             </form>
+
+            <section id="edit-products">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Admin</p>
+                        <h2>Edit Products</h2>
+                        <p class="muted">Select a product to edit its details, variations, and sizes.</p>
+                    </div>
+                </div>
+                <div id="product-list-edit" class="admin-list"></div>
+            </section>
 
             <section id="inventory">
                 <div class="section-header">

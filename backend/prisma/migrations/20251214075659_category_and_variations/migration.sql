@@ -86,10 +86,6 @@ UPDATE "Product"
 SET name = name || '-' || id
 WHERE id IN (SELECT id FROM duplicates WHERE rn > 1);
 
-SET name = name || '-dup-' || id
-WHERE id IN (
-    SELECT id FROM duplicates WHERE rn > 1
-);
 
 CREATE UNIQUE INDEX "Product_name_key" ON "Product"("name");
 PRAGMA foreign_keys=ON;

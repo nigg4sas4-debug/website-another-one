@@ -9,14 +9,14 @@ const router = express.Router();
 router.use(authenticate(false));
 
 function normalizeProductPayload(body) {
-  const { name, description, price, imageUrl, stock, featured, onSale, discountPct, category } = body;
+  const { name, description, price, imageUrl, base64Image, stock, featured, onSale, discountPct, category } = body;
   const categoryName = category?.name || category;
   const safePrice = price == null ? undefined : Number(price);
   return {
     name,
     description: description ?? "",
     price: safePrice,
-    imageUrl: imageUrl ?? null,
+    imageUrl: base64Image || (imageUrl ?? null),
     stock: stock == null ? undefined : Number(stock),
     featured: Boolean(featured),
     onSale: Boolean(onSale),
@@ -102,8 +102,6 @@ router.post(
     const derivedPrice = variations?.[0]?.sizes?.[0]?.price;
 
     if (!payload.name || (payload.price == null && derivedPrice == null)) {
-
-    if (!payload.name || payload.price == null) {
       return res.status(400).json({ message: "Name and price are required" });
     }
 
@@ -114,8 +112,6 @@ router.post(
         name: payload.name,
         description: payload.description,
         price: payload.price ?? coerceNumber(derivedPrice),
-
-        price: payload.price,
         imageUrl: payload.imageUrl,
         stock: payload.stock || 0,
         featured: payload.featured,
@@ -126,8 +122,6 @@ router.post(
     });
 
     await replaceVariations(product.id, variations);
-
-    await replaceVariations(product.id, req.body.variations);
 
     const withRelations = await prisma.product.findUnique({
       where: { id: product.id },
@@ -208,29 +202,7 @@ router.patch(
         stock: payload.stock ?? size.stock,
         price: payload.price ?? size.price,
         label: payload.label ?? size.label,
-
-    await prisma.product.update({
-      where: { id },
-      data: {
-        name: payload.name ?? existing.name,
-        description: payload.description ?? existing.description,
-        price: payload.price == null ? existing.price : payload.price,
-        imageUrl: payload.imageUrl === undefined ? existing.imageUrl : payload.imageUrl,
-        stock: payload.stock == null ? existing.stock : payload.stock,
-        featured: payload.featured ?? existing.featured,
-        onSale: payload.onSale ?? existing.onSale,
-        discountPct: payload.discountPct ?? existing.discountPct,
-        categoryId: category ? category.id : payload.categoryName === null ? null : existing.categoryId,
       },
-    });
-
-    if (Array.isArray(req.body.variations)) {
-      await replaceVariations(id, req.body.variations);
-    }
-
-    const updated = await prisma.product.findUnique({
-      where: { id },
-      include: { category: true, variations: { include: { sizes: true } } },
     });
 
     res.json(updated);

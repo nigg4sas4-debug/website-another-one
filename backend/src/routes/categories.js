@@ -27,8 +27,15 @@ router.post(
     const name = String(req.body.name || "").trim();
     if (!name) return res.status(400).json({ message: "Name is required" });
 
-    const category = await prisma.category.create({ data: { name } });
-    res.status(201).json(category);
+    try {
+      const category = await prisma.category.create({ data: { name } });
+      res.status(201).json(category);
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+        return res.status(409).json({ message: "Category with this name already exists" });
+      }
+      throw error; // Re-throw other errors
+    }
   })
 );
 

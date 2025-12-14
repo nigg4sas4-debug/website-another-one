@@ -62,6 +62,21 @@
                 return `<div class="tile" style="background-image: ${background};"></div>`;
             })
             .join("");
+
+        const tiles = galleryEl.querySelectorAll('.tile');
+        if (tiles.length > 1) {
+            tiles.forEach((tile, index) => {
+                if (index > 0) {
+                    tile.addEventListener('click', () => {
+                        const mainImage = galleryEl.querySelector('.tile:first-child');
+                        // Swap background images
+                        const mainImageBackground = mainImage.style.backgroundImage;
+                        mainImage.style.backgroundImage = tile.style.backgroundImage;
+                        tile.style.backgroundImage = mainImageBackground;
+                    });
+                }
+            });
+        }
     }
 
     function updateSizes(showSelectedPrice = false) {

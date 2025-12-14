@@ -87,6 +87,19 @@ router.get(
 );
 
 router.get(
+  "/cancellations",
+  asyncHandler(async (req, res) => {
+    const isAdmin = req.user.role === ADMIN_ROLE;
+    const requests = await prisma.cancellationRequest.findMany({
+      where: isAdmin ? {} : { userId: req.user.id },
+      include: { order: true, user: { select: { id: true, email: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(requests);
+  })
+);
+
+router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -174,19 +187,6 @@ router.post(
     });
 
     res.status(201).json(request);
-  })
-);
-
-router.get(
-  "/cancellations",
-  asyncHandler(async (req, res) => {
-    const isAdmin = req.user.role === ADMIN_ROLE;
-    const requests = await prisma.cancellationRequest.findMany({
-      where: isAdmin ? {} : { userId: req.user.id },
-      include: { order: true, user: { select: { id: true, email: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(requests);
   })
 );
 

@@ -9,28 +9,45 @@
     const categoryForm = document.getElementById("category-form");
     const categorySelect = document.getElementById("product-category");
     const productForm = document.getElementById("product-form");
+    const productImageUpload = document.getElementById("product-image-upload");
+    const productImagePreview = document.getElementById("product-image-preview");
+    const base64ImageHidden = document.getElementById("base64-image-hidden");
     const variationList = document.getElementById("variation-list");
     const addVariationBtn = document.getElementById("add-variation");
-    const saleToggle = document.getElementById("product-sale");
-    const discountWrapper = document.getElementById("discount-wrapper");
-    const discountInput = document.getElementById("discount-pct");
 
     let cachedProducts = [];
     let cachedCategories = [];
     let cachedCancellations = [];
 
-    function toggleDiscountVisibility() {
-        if (!discountWrapper) return;
-        discountWrapper.classList.toggle("hidden", !saleToggle?.checked);
-        if (!saleToggle?.checked && discountInput) discountInput.value = "";
+    window.closeEditModal = () => {
+        document.getElementById('edit-product-modal')?.remove();
     }
 
-    function createSizeRow({ label = "", stock = "", price = "" } = {}) {
+    // Image upload and preview
+    productImageUpload?.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                productImagePreview.src = e.target.result;
+                productImagePreview.classList.remove("hidden");
+                base64ImageHidden.value = e.target.result; // Store Base64 string in hidden input
+            };
+            reader.readAsDataURL(file);
+        } else {
+            productImagePreview.src = "";
+            productImagePreview.classList.add("hidden");
+            base64ImageHidden.value = "";
+        }
+    });
+
+    
+
+    function createSizeRow({ label = "", price = "" } = {}) {
         const row = document.createElement("div");
         row.className = "size-row";
         row.innerHTML = `
             <label>Size<input name="size-label" type="text" value="${label}" placeholder="S"></label>
-            <label>Stock<input name="size-stock" type="number" min="0" value="${stock}" placeholder="0"></label>
             <label>Price<input name="size-price" type="number" min="0" step="0.01" value="${price}" placeholder="50"></label>
             <button type="button" class="link" data-remove-size>Remove</button>
         `;
@@ -139,7 +156,7 @@
         if (!name) return;
         try {
             await apiClient.createCategory(name);
-            event.currentTarget.reset();
+            event.target.reset();
             await loadCategories();
         } catch (err) {
             alert(`Unable to create category: ${err.message}`);
@@ -184,7 +201,7 @@
                 <article class="product-row">
                     <div>
                         <strong>${product.name}</strong>
-                        <p class="muted">${product.category}</p>
+                        <p class="muted">${product.category?.name || 'Uncategorized'}</p>
                         ${product.onSale ? `<span class="pill pill-sale">Sale ${product.discountPct}%</span>` : ""}
                     </div>
                     <div class="pill">Stock: ${product.variations?.flatMap(v => v.sizes || []).reduce((s, sz) => s + (Number(sz.stock) || 0), 0)}</div>
@@ -194,6 +211,185 @@
             )
             .join("");
     }
+
+    function renderProductsForEdit() {
+        const productListEdit = document.getElementById("product-list-edit");
+        if (!productListEdit) return;
+        if (!cachedProducts.length) {
+            productListEdit.innerHTML = `<p class="muted">No products yet.</p>`;
+            return;
+        }
+        productListEdit.innerHTML = cachedProducts
+            .map(
+                (product) => `
+                <article class="product-row" data-product-id="${product.id}">
+                    <div>
+                        <strong>${product.name}</strong>
+                        <p class="muted">${product.category?.name || 'Uncategorized'}</p>
+                    </div>
+                    <div class="pill">Stock: ${product.variations?.flatMap(v => v.sizes || []).reduce((s, sz) => s + (Number(sz.stock) || 0), 0)}</div>
+                    <div class="price">${window.getPriceRange?.(product)}</div>
+                    <button class="btn ghost" data-edit-product>Edit</button>
+                </article>
+            `
+            )
+            .join("");
+    }
+
+    function openEditProductModal(product) {
+    const modalHtml = `
+    <div class="modal-overlay show" id="edit-product-modal">
+        <div class="modal" style="max-width: 800px; overflow-y: auto; max-height: 90vh;">
+            <header>
+                <h2>Edit Product</h2>
+                <button class="link" onclick="closeEditModal()">Close</button>
+            </header>
+            <form id="edit-product-form" class="stacked">
+                <input type="hidden" name="productId" value="${product.id}">
+                <div class="grid-2">
+                    <label>Name<input required name="name" type="text" value="${product.name}"></label>
+                    <label>Category
+                        <select name="category">
+                            ${cachedCategories.map(cat => `<option value="${cat.name}" ${product.category?.name === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                        </select>
+                    </label>
+                </div>
+                <label>Description<textarea name="description">${product.description}</textarea></label>
+                <div class="grid-2">
+                    <label class="checkbox-inline"><input name="featured" type="checkbox" ${product.featured ? 'checked' : ''}> Featured</label>
+                    <label class="checkbox-inline"><input name="sale" type="checkbox" ${product.onSale ? 'checked' : ''}> Sale</label>
+                </div>
+                <label>Discount %<input name="discountPct" type="number" min="0" max="90" step="1" value="${product.discountPct || ''}"></label>
+
+                <h3>Variations & Sizes</h3>
+                <div id="edit-variation-list" class="variation-grid">
+                    ${product.variations.map(v => `
+                        <div class="variation-card" data-variation-id="${v.id}">
+                            <label>Variation Name<input name="variation-name" value="${v.name}"></label>
+                            <div class="size-list">
+                                ${v.sizes.map(s => `
+                                    <div class="size-row" data-size-id="${s.id}">
+                                        <label>Size<input name="size-label" value="${s.label}"></label>
+                                        <label>Price<input name="size-price" value="${s.price}"></label>
+                                        <button type="button" class="link" data-remove-size>Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="variation-actions">
+                                <button type="button" class="btn ghost" data-add-size>Add Size</button>
+                                <button type="button" class="btn danger ghost" data-remove-variation>Remove Variation</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="btn ghost" id="add-edit-variation">Add Variation</button>
+
+                <div class="actions">
+                    <button type="submit" class="btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    window.closeEditModal = () => {
+        document.getElementById('edit-product-modal')?.remove();
+    }
+
+    const modal = document.getElementById('edit-product-modal');
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeEditModal();
+        }
+    });
+
+    const editForm = document.getElementById('edit-product-form');
+
+    editForm.addEventListener('click', (event) => {
+        const target = event.target;
+        if(target.dataset.addSize) {
+            const sizeList = target.closest('.variation-card').querySelector('.size-list');
+            sizeList.appendChild(createSizeRow());
+        }
+        if(target.dataset.removeSize) {
+            target.closest('.size-row').remove();
+        }
+        if(target.dataset.removeVariation) {
+            target.closest('.variation-card').remove();
+        }
+    });
+
+    document.getElementById('add-edit-variation').addEventListener('click', () => {
+        const variationList = document.getElementById('edit-variation-list');
+        const block = document.createElement("div");
+        block.className = "variation-card";
+        block.innerHTML = `
+            <label>Variation Name<input name="variation-name" value="New Variation"></label>
+            <div class="size-list">
+                ${createSizeRow({label: 'S'}).outerHTML}
+            </div>
+            <div class="variation-actions">
+                <button type="button" class="btn ghost" data-add-size>Add Size</button>
+                <button type="button" class="btn danger ghost" data-remove-variation>Remove Variation</button>
+            </div>
+        `;
+        variationList.appendChild(block);
+    });
+
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(editForm);
+        const productId = fd.get('productId');
+        const name = fd.get('name');
+        const description = fd.get('description');
+        const category = fd.get('category');
+        const featured = fd.get('featured') === 'on';
+        const onSale = fd.get('sale') === 'on';
+        const discountPct = onSale ? Number(fd.get('discountPct') || 0) : 0;
+
+        const variations = Array.from(document.querySelectorAll('#edit-variation-list .variation-card')).map(card => {
+            const variationName = card.querySelector('input[name="variation-name"]').value;
+            const sizes = Array.from(card.querySelectorAll('.size-row')).map(row => ({
+                label: row.querySelector('input[name="size-label"]').value,
+                price: Number(row.querySelector('input[name="size-price"]').value || 0)
+            }));
+            return { name: variationName, sizes };
+        });
+
+        try {
+            await apiClient.updateProduct(productId, {
+                name,
+                description,
+                categoryName: category,
+                featured,
+                onSale,
+                discountPct,
+                variations
+            });
+            await loadProducts();
+            closeEditModal();
+        } catch (err) {
+            alert('Failed to update product: ' + err.message);
+        }
+    });
+}
+
+    document.querySelector('.admin-content')?.addEventListener('click', (event) => {
+        const target = event.target;
+        if ('editProduct' in target.dataset) {
+            console.log('Edit button clicked');
+            const productRow = target.closest('.product-row');
+            const productId = productRow.dataset.productId;
+            const product = cachedProducts.find(p => p.id == productId);
+            if (product) {
+                openEditProductModal(product);
+            } else {
+                console.error('Product not found for ID:', productId);
+            }
+        }
+    });
 
     function renderInventory() {
         if (!inventoryGrid) return;
@@ -228,21 +424,14 @@
             cachedProducts = await apiClient.getProducts();
             renderProducts();
             renderInventory();
+            renderProductsForEdit();
         } catch (err) {
             if (productList) productList.innerHTML = `<p class="muted">Unable to load products: ${err.message}</p>`;
         }
     }
 
-    async function loadOrders() {
-        if (!orderList) return;
+    async function loadOrdersAndCancellations() {
         try {
-            const orders = await apiClient.listOrders();
-            const selectedTab = document.querySelector("[data-status-tab].active")?.dataset.statusTab?.toUpperCase();
-            const filtered = selectedTab ? orders.filter((o) => o.status === selectedTab) : orders;
-            orderList.innerHTML = filtered
-                .map(
-                    (order) => `
-
             const [orders, cancellations] = await Promise.all([
                 apiClient.listOrders(),
                 apiClient.listCancellations(),
@@ -250,8 +439,8 @@
 
             if (orderList) {
                 const selectedTab = document.querySelector('[data-status-tab].active')?.dataset.statusTab?.toUpperCase();
-                const filtered = selectedTab ? orders.filter((o) => o.status === selectedTab) : orders;
-                orderList.innerHTML = filtered
+                const filteredOrders = selectedTab ? orders.filter((o) => o.status === selectedTab) : orders;
+                orderList.innerHTML = filteredOrders
                     .map(
                         (order) => `
                     <article class="order-card" data-id="${order.id}">
@@ -269,74 +458,38 @@
                         <span class="pill">$${Number(order.total).toFixed(2)}</span>
                     </article>
                 `
-                )
-                .join("");
-        } catch (err) {
-            orderList.innerHTML = `<p class="muted">Unable to load orders: ${err.message}</p>`;
-        }
-    }
-
-    async function loadCancellations() {
-        if (!cancellationList) return;
-        try {
-            cachedCancellations = await apiClient.listCancellations();
-            const selectedTab = document.querySelector("[data-cancel-tab].active")?.dataset.cancelTab || "PENDING";
-            const filtered = cachedCancellations.filter((req) => req.status === selectedTab);
-            if (!filtered.length) {
-                cancellationList.innerHTML = `<p class="muted">No ${selectedTab.toLowerCase()} requests.</p>`;
-                return;
                     )
                     .join("");
             }
+
             if (cancellationList) {
-                const grouped = { PENDING: [], REJECTED: [], SUCCESS: [] };
-                (cancellations || []).forEach((req) => {
-                    grouped[req.status]?.push(req);
-                });
-                cancellationList.innerHTML = Object.entries(grouped)
-                    .map(([status, list]) => `
-                        <div class="stacked">
-                            <h4>${status}</h4>
-                            ${list
-                                .map(
-                                    (req) => `
-                                        <article class="order-card" data-cancel-id="${req.id}">
-                                            <div>
-                                                <strong>Order ${req.orderId}</strong>
-                                                <p class="muted">${req.reason || "Customer request"}</p>
-                                            </div>
-                                            <select data-action="cancel-status">
-                                                ${["PENDING", "REJECTED", "SUCCESS"].map(
-                                                    (opt) => `<option value="${opt}" ${req.status === opt ? "selected" : ""}>${opt}</option>`
-                                                ).join("")}
-                                            </select>
-                                        </article>
-                                    `
-                                )
-                                .join("") || `<p class="muted">No ${status.toLowerCase()} requests</p>`}
-                        </div>
-                    `)
-                    .join("");
+                const selectedCancelTab = document.querySelector("[data-cancel-tab].active")?.dataset.cancelTab || "PENDING";
+                const filteredCancellations = cancellations.filter((req) => req.status === selectedCancelTab);
+                if (!filteredCancellations.length) {
+                    cancellationList.innerHTML = `<p class="muted">No ${selectedCancelTab.toLowerCase()} requests.</p>`;
+                } else {
+                    cancellationList.innerHTML = filteredCancellations
+                        .map(
+                            (req) => `
+                                <article class="order-card" data-cancel-id="${req.id}">
+                                    <div>
+                                        <strong>Order ${req.orderId}</strong>
+                                        <p class="muted">${req.reason || "Customer request"}</p>
+                                    </div>
+                                    <select data-action="cancel-status">
+                                        ${["PENDING", "REJECTED", "SUCCESS"].map(
+                                            (opt) => `<option value="${opt}" ${req.status === opt ? "selected" : ""}>${opt}</option>`
+                                        ).join("")}
+                                    </select>
+                                </article>
+                            `
+                        )
+                        .join("");
+                }
             }
-            cancellationList.innerHTML = filtered
-                .map(
-                    (req) => `
-                        <article class="order-card" data-cancel-id="${req.id}">
-                            <div>
-                                <strong>Order ${req.orderId}</strong>
-                                <p class="muted">${req.reason || "Customer request"}</p>
-                            </div>
-                            <select data-action="cancel-status">
-                                ${["PENDING", "REJECTED", "SUCCESS"].map(
-                                    (opt) => `<option value="${opt}" ${req.status === opt ? "selected" : ""}>${opt}</option>`
-                                ).join("")}
-                            </select>
-                        </article>
-                    `
-                )
-                .join("");
         } catch (err) {
-            cancellationList.innerHTML = `<p class="muted">Unable to load cancellations: ${err.message}</p>`;
+            if (orderList) orderList.innerHTML = `<p class="muted">Unable to load orders: ${err.message}</p>`;
+            if (cancellationList) cancellationList.innerHTML = `<p class="muted">Unable to load cancellations: ${err.message}</p>`;
         }
     }
 
@@ -347,18 +500,9 @@
             const status = target.value;
             try {
                 await apiClient.updateOrderStatus(orderId, status);
-                await loadOrders();
+                await loadOrdersAndCancellations();
             } catch (err) {
                 alert(`Unable to update order: ${err.message}`);
-            }
-        }
-        if (target instanceof HTMLSelectElement && target.dataset.action === "cancel-status") {
-            const cancelId = target.closest(".order-card")?.dataset.cancelId;
-            const status = target.value;
-            try {
-                await apiClient.updateCancellation(cancelId, status);
-            } catch (err) {
-                alert(`Unable to update cancellation: ${err.message}`);
             }
         }
     });
@@ -367,7 +511,7 @@
         btn.addEventListener('click', (event) => {
             document.querySelectorAll('[data-status-tab]').forEach((b) => b.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            loadOrders();
+            loadOrdersAndCancellations();
         });
     });
 
@@ -378,7 +522,7 @@
             const status = target.value;
             try {
                 await apiClient.updateCancellation(cancelId, status);
-                await loadCancellations();
+                await loadOrdersAndCancellations();
             } catch (err) {
                 alert(`Unable to update cancellation: ${err.message}`);
             }
@@ -389,7 +533,7 @@
         btn.addEventListener("click", (event) => {
             document.querySelectorAll("[data-status-tab]").forEach((b) => b.classList.remove("active"));
             event.currentTarget.classList.add("active");
-            loadOrders();
+            loadOrdersAndCancellations();
         });
     });
 
@@ -397,16 +541,15 @@
         btn.addEventListener("click", (event) => {
             document.querySelectorAll("[data-cancel-tab]").forEach((b) => b.classList.remove("active"));
             event.currentTarget.classList.add("active");
-            loadCancellations();
+            loadOrdersAndCancellations();
         });
     });
 
     inventoryGrid?.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        if (target.dataset.updateSize) {
-            const row = target.closest("[data-size-id]");
-            const id = row?.dataset.sizeId;
+        if ('updateSize' in target.dataset) {
+            const row = target.closest("[data-size-id]");            const id = row?.dataset.sizeId;
             const stockInput = row?.querySelector("[data-stock-input]");
             const priceInput = row?.querySelector("[data-price-input]");
             try {
@@ -427,36 +570,27 @@
         const fd = new FormData(e.currentTarget);
         const name = String(fd.get("name") || "").trim();
         const description = String(fd.get("description") || "").trim();
-        const imageUrl = String(fd.get("imageUrl") || "").trim() || null;
+        const base64Image = base64ImageHidden.value || null;
         const category = String(fd.get("category") || "").trim();
-        const featured = Boolean(fd.get("featured"));
-        const onSale = Boolean(fd.get("sale"));
-        const discountPct = onSale ? Number(fd.get("discountPct") || 0) : 0;
 
         const variations = Array.from(variationList?.querySelectorAll(".variation-block") || []).map((block) => {
             const variationName = block.querySelector("input[name='variation-name']")?.value || "Default";
             const sizes = Array.from(block.querySelectorAll(".size-row")).map((row) => {
                 const label = row.querySelector("input[name='size-label']")?.value || "";
-                const stock = Number(row.querySelector("input[name='size-stock']")?.value || 0);
                 const price = Number(row.querySelector("input[name='size-price']")?.value || 0);
-                return { label, stock, price };
+                return { label, price };
             }).filter((s) => s.label);
             return { name: variationName, sizes };
         }).filter((v) => v.sizes.length);
 
-        const totalStock = variations.flatMap((v) => v.sizes).reduce((sum, size) => sum + (Number(size.stock) || 0), 0);
         const basePrice = variations?.[0]?.sizes?.[0]?.price ?? 0;
 
         try {
             await apiClient.createProduct({
                 name,
                 description,
-                imageUrl,
+                imageUrl: base64Image,
                 category,
-                featured,
-                onSale,
-                discountPct,
-                stock: totalStock,
                 price: basePrice,
                 variations,
             });
@@ -465,13 +599,11 @@
             productForm.reset();
             variationList.innerHTML = "";
             ensureInitialVariation();
-            toggleDiscountVisibility();
         } catch (err) {
             alert(`Unable to create product: ${err.message}`);
         }
     });
 
-    toggleDiscountVisibility();
     ensureInitialVariation();
-    await Promise.all([loadCategories(), loadProducts(), loadOrders(), loadCancellations()]);
+    await Promise.all([loadCategories(), loadProducts(), loadOrdersAndCancellations()]);
 })();

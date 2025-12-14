@@ -472,16 +472,27 @@ main {
 
 .gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
 }
 
 .gallery .tile {
-    height: 160px;
+    height: 100px; /* Smaller height for thumbnails */
     border-radius: var(--radius);
     background-size: cover;
     background-position: center;
     border: 1px solid var(--border);
+    cursor: pointer; /* Add a pointer cursor to indicate it's clickable */
+    transition: all 0.2s ease-in-out;
+}
+
+.gallery .tile:hover {
+    transform: scale(1.05);
+}
+
+.gallery .tile:first-child {
+    grid-column: span 4; /* Make the first tile span all 4 columns */
+    height: 400px; /* A larger height for the main image */
 }
 
 .product-info {
@@ -1022,4 +1033,30 @@ main {
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+.variation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+}
+
+.variation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+.admin-list .product-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card); /* Using var(--card) for consistency */
+    box-shadow: var(--shadow); /* Added for better visual separation */
 }
