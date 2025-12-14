@@ -1,7 +1,7 @@
 (async function () {
     if (!window.apiClient) return;
     const productList = document.getElementById("product-list");
-    const orderList = document.getElementById("order-list");
+    const orderList = document.getElementById("admin-orders");
     const cancellationList = document.getElementById("cancellation-requests");
 
     const inventoryGrid = document.getElementById("inventory-grid");
@@ -61,15 +61,17 @@
         if (!orderList && !cancellationList) return;
         try {
             const orders = await apiClient.listOrders();
+            console.log("Orders from frontend:", JSON.stringify(orders, null, 2));
             if (orderList) {
+                console.log("orderList before:", orderList.innerHTML);
                 orderList.innerHTML = orders
                     .map(
                         (order) => `
-                    <article class="order-row" data-id="${order.id}">
+                    <article class="order-card" data-id="${order.id}">
                         <div>
                             <strong>Order ${order.id}</strong>
                             <p class="muted">${order.items
-                                ?.map((item) => item.product?.name || `Product ${item.productId}`)
+                                ?.map((item) => `${item.quantity}x ${item.product?.name || `Product ${item.productId}`}`)
                                 .join(", ")}</p>
                         </div>
                         <select data-action="status">
@@ -82,13 +84,14 @@
                 `
                     )
                     .join("");
+                console.log("orderList after:", orderList.innerHTML);
             }
             if (cancellationList) {
                 const cancellations = orders.filter((order) => order.status === "CANCELLED");
                 cancellationList.innerHTML = cancellations
                     .map(
                         (order) => `
-                    <article class="order-row">
+                    <article class="order-card">
                         <div>
                             <strong>${order.id}</strong>
                             <p class="muted">Cancelled</p>
@@ -107,7 +110,7 @@
     orderList?.addEventListener("change", async (event) => {
         const target = event.target;
         if (target instanceof HTMLSelectElement && target.dataset.action === "status") {
-            const orderId = target.closest(".order-row")?.dataset.id;
+            const orderId = target.closest(".order-card")?.dataset.id;
             const status = target.value;
             try {
                 await apiClient.updateOrderStatus(orderId, status);
