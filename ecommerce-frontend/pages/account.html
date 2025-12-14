@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account — ETERNA LUXE</title>
+    <link rel="stylesheet" href="../css/main.css?v=3">
+    <link rel="stylesheet" href="../css/footer.css?v=3">
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo"><a href="./index.html">ETERNA LUXE</a></div>
+        <form class="site-search" aria-label="Search products">
+            <input type="search" placeholder="Search products" aria-label="Search" />
+            <button type="submit">Search</button>
+        </form>
+        <nav>
+            <ul class="desktop-nav">
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="./product-catalog.html">Catalog</a></li>
+                <li><a href="./about.html">About</a></li>
+                <li><a href="./contact.html">Contact</a></li>
+                <li><a href="./order-tracking.html">Orders</a></li>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <a class="pill" href="./cart.html">Cart <span class="count-badge" data-cart-count>0</span></a>
+            <a class="pill" href="./login.html">Login</a>
+            <a class="pill pill-accent" href="./signup.html">Sign up</a>
+            <div id="hamburger-menu" class="hamburger-menu" aria-label="Toggle menu" tabindex="0">
+                <span></span><span></span><span></span>
+            </div>
+            <ul id="hamburger-dropdown" class="hamburger-dropdown">
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="./product-catalog.html">Catalog</a></li>
+                <li><a href="./order-tracking.html">Orders</a></li>
+                <li><a href="./login.html">Profile</a></li>
+                <li><a href="./signup.html">Sign up</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">Account</p>
+                <h1>Your personal details</h1>
+                <p class="muted">Review and edit the essentials tied to your profile. Changes are stored securely for your next visit.</p>
+            </div>
+        </div>
+
+        <div class="account-grid">
+            <section class="card">
+                <div class="card-head">
+                    <div>
+                        <p class="eyebrow">Profile</p>
+                        <h3>Contact information</h3>
+                        <p class="muted">Update how we reach you and where we ship.</p>
+                    </div>
+                    <div class="pill soft" id="account-status">Saved</div>
+                </div>
+                <form id="account-form" class="stacked grid-2">
+                    <label>Full name<input name="fullName" type="text" required placeholder="Jane Doe"></label>
+                    <label>Email<input name="email" type="email" required placeholder="you@example.com"></label>
+                    <label>Phone<input name="phone" type="tel" placeholder="+1 555 0000"></label>
+                    <label>City<input name="city" type="text" placeholder="San Francisco"></label>
+                    <label>Address line 1<input name="address1" type="text" placeholder="123 Market St"></label>
+                    <label>Address line 2<input name="address2" type="text" placeholder="Apt, suite, etc."></label>
+                    <label>Postal code<input name="postal" type="text" placeholder="94103"></label>
+                    <label>Country<input name="country" type="text" placeholder="USA"></label>
+                    <div class="actions" style="grid-column: 1 / -1;">
+                        <button type="submit" class="btn">Save changes</button>
+                        <button type="button" class="btn ghost" id="reset-account">Reset</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card muted-bg">
+                <div class="card-head">
+                    <div>
+                        <p class="eyebrow">Security</p>
+                        <h3>Session controls</h3>
+                        <p class="muted">Manage sign-in state and visibility.</p>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Orders and carts are scoped to your account only.</li>
+                    <li>Logging out clears tokens from this browser.</li>
+                    <li>Switch accounts to see a different cart or order history.</li>
+                </ul>
+                <button class="btn ghost" id="logout-account">Logout</button>
+            </section>
+        </div>
+    </main>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/account.js"></script>
+</body>
+</html>

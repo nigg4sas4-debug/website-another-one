@@ -1140,3 +1140,117 @@ main {
     background: var(--card); /* Using var(--card) for consistency */
     box-shadow: var(--shadow); /* Added for better visual separation */
 }
+/* Admin modal and trash styling */
+.modal.elevated {
+    border: 1px solid var(--border);
+    box-shadow: 0 16px 60px rgba(0,0,0,0.12);
+    border-radius: 16px;
+    background: var(--surface);
+}
+
+.modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-head__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sleek-form .grid-2 label input,
+.sleek-form textarea {
+    border-radius: 10px;
+}
+
+.product-row.trashed {
+    border: 1px dashed var(--border);
+    background: var(--surface-2);
+}
+
+.product-row .row-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Profile dropdown */
+.profile-menu {
+    position: relative;
+}
+
+.profile-trigger {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.avatar-circle {
+    font-size: 18px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    right: 0;
+    margin-top: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    padding: 12px;
+    display: none;
+    min-width: 200px;
+    z-index: 20;
+}
+
+.profile-dropdown.show {
+    display: grid;
+    gap: 8px;
+}
+
+.profile-dropdown a,
+.profile-dropdown button {
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.profile-dropdown a:hover,
+.profile-dropdown button:hover {
+    background: var(--surface-2);
+}
+
+.profile-meta {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+
+.logout-link {
+    color: var(--danger);
+}
+
+/* Account page */
+.account-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .account-grid {
+        grid-template-columns: 1fr;
+    }
+}

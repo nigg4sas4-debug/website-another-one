@@ -22,6 +22,110 @@
     const categoryGrid = document.getElementById("category-grid");
     const catalogGrid = document.getElementById("catalog-grid");
 
+    const THEME_KEY = "site-theme";
+
+    function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem(THEME_KEY, theme);
+    }
+
+    function toggleTheme() {
+        const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        applyTheme(next);
+    }
+
+    (function initTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved) {
+            applyTheme(saved);
+        }
+    })();
+
+    function ensureProfileMenu(container) {
+        let menu = container.querySelector(".profile-menu");
+        if (menu) return menu;
+        container.insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="profile-menu hidden">
+                <button type="button" class="profile-trigger" aria-label="Profile" aria-expanded="false">
+                    <span class="avatar-circle" aria-hidden="true">👤</span>
+                </button>
+                <div class="profile-dropdown" role="menu">
+                    <div class="profile-meta">
+                        <strong id="profile-email">Account</strong>
+                        <p class="muted" id="profile-role"></p>
+                    </div>
+                    <a href="./account.html" role="menuitem">Account</a>
+                    <a href="./settings.html" role="menuitem">Settings</a>
+                    <button type="button" data-toggle-theme role="menuitem">Toggle theme</button>
+                    <button type="button" data-logout role="menuitem" class="logout-link">Logout</button>
+                </div>
+            </div>
+        `
+        );
+        return container.querySelector(".profile-menu");
+    }
+
+    async function hydrateUserNav() {
+        const headerActions = document.querySelector(".header-actions");
+        if (!headerActions) return;
+        const profileMenu = ensureProfileMenu(headerActions);
+        const trigger = profileMenu.querySelector(".profile-trigger");
+        const dropdown = profileMenu.querySelector(".profile-dropdown");
+        const emailEl = profileMenu.querySelector("#profile-email");
+        const roleEl = profileMenu.querySelector("#profile-role");
+        const logoutBtn = profileMenu.querySelector("[data-logout]");
+        const themeBtn = profileMenu.querySelector("[data-toggle-theme]");
+
+        let user = null;
+        if (window.apiClient?.getToken()) {
+            try {
+                user = await apiClient.me();
+            } catch (_) {
+                // ignore
+            }
+        }
+
+        const loggedIn = Boolean(user);
+        emailEl.textContent = user?.email || "Welcome";
+        roleEl.textContent = user?.role ? user.role.toLowerCase() : "Guest";
+
+        const authSelectors = [
+            ".header-actions a[href$='login.html']",
+            ".header-actions a[href$='signup.html']",
+            "#hamburger-dropdown a[href$='login.html']",
+            "#hamburger-dropdown a[href$='signup.html']",
+        ];
+        document.querySelectorAll(authSelectors.join(",")).forEach((el) => {
+            el.classList.toggle("hidden", loggedIn);
+        });
+
+        profileMenu.classList.toggle("hidden", !loggedIn);
+
+        trigger.onclick = () => {
+            const expanded = trigger.getAttribute("aria-expanded") === "true";
+            trigger.setAttribute("aria-expanded", (!expanded).toString());
+            dropdown.classList.toggle("show", !expanded);
+        };
+
+        document.addEventListener("click", (event) => {
+            if (!profileMenu.contains(event.target)) {
+                trigger.setAttribute("aria-expanded", "false");
+                dropdown.classList.remove("show");
+            }
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            if (!confirm("Log out of this account?")) return;
+            apiClient?.setToken(null);
+            localStorage.removeItem("profile");
+            window.location.href = "./index.html";
+        });
+
+        themeBtn.addEventListener("click", toggleTheme);
+    }
+
     async function hydrateProducts() {
         if (!window.apiClient) return;
         console.log('hydrateProducts: fetching products');
@@ -96,7 +200,7 @@
 
     window.addEventListener("storage", () => window.updateCartBadges?.());
 
-    await Promise.all([hydrateProducts(), window.updateCartBadges()]);
+    await Promise.all([hydrateProducts(), window.updateCartBadges(), hydrateUserNav()]);
 })();
 
 function getPriceRange(product, { useOriginal = false } = {}) {
