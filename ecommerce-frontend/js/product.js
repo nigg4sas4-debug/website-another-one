@@ -32,13 +32,16 @@
     }
 
     const basePriceRange = window.getPriceRange?.(product) || "$0.00";
+    const originalRange = product.onSale ? window.getPriceRange?.(product, { useOriginal: true }) : null;
     if (!product || !variationSelect) return;
 
     nameEl.textContent = product.name;
     descEl.textContent = product.description;
     ratingEl.textContent = `★ ${product.rating}`;
     categoryEl.textContent = product.category;
-    priceEl.textContent = basePriceRange;
+    priceEl.innerHTML = product.onSale && originalRange
+        ? `<span class="price sale">${basePriceRange}</span> <span class="price original">${originalRange}</span>`
+        : basePriceRange;
 
     product.variations.forEach((variation, index) => {
         const option = document.createElement("option");
@@ -75,7 +78,11 @@
         const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes[0];
         if (!size) return;
         stockCount.textContent = `${size.stock} in stock`;
-        priceEl.textContent = showSelectedPrice ? `$${size.price.toFixed(2)}` : basePriceRange;
+        if (product.onSale && size.originalPrice && showSelectedPrice) {
+            priceEl.innerHTML = `<span class="price sale">$${size.price.toFixed(2)}</span> <span class="price original">$${Number(size.originalPrice).toFixed(2)}</span>`;
+        } else {
+            priceEl.textContent = showSelectedPrice ? `$${size.price.toFixed(2)}` : basePriceRange;
+        }
         const out = size.stock === 0;
         stockAlert.hidden = !out;
         addToCartBtn.disabled = out;

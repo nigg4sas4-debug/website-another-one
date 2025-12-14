@@ -12,6 +12,9 @@
     async function loadOrders() {
         try {
             orders = await apiClient.listOrders();
+            const cancellations = await apiClient.listCancellations();
+            const byOrder = Object.fromEntries(cancellations.map((c) => [String(c.orderId), c]));
+            orders = orders.map((order) => ({ ...order, cancellation: byOrder[String(order.id)] }));
         } catch (err) {
             if (ordersContainer) {
                 ordersContainer.innerHTML = `<p class="muted">Unable to load orders: ${err.message}</p>`;
@@ -29,12 +32,14 @@
         }
         ordersContainer.innerHTML = list
             .map((order) => {
-                const cancellationState = order.status === "CANCELLED" ? "Cancelled" : null;
-                const disableAction = cancellationState || order.status === "FULFILLED";
-                const actionLabel = cancellationState ? "Request submitted" : "Submit cancellation";
-                const statusPill = cancellationState
-                    ? `<span class="pill pill-accent">Cancellation ${cancellationState.toLowerCase()}</span>`
-                    : `<span class="pill">${order.status}</span>`;
+                const cancellation = order.cancellation;
+                const hasRequest = Boolean(cancellation);
+                const disableAction = hasRequest || order.status === "DELIVERED";
+                const actionLabel = hasRequest ? `Request ${cancellation.status.toLowerCase()}` : "Submit cancellation";
+                const statusPill = `<span class="pill">${order.status}</span>`;
+                const cancelPill = hasRequest
+                    ? `<span class="pill ${cancellation.status === 'SUCCESS' ? 'pill-accent' : ''}">Cancellation ${cancellation.status.toLowerCase()}</span>`
+                    : "";
                 const items = order.items
                     ?.map((item) => {
                         const name = item.product?.name || `Product ${item.productId}`;
@@ -46,7 +51,7 @@
             <article class="order-card">
                 <header>
                     <strong>${order.id}</strong>
-                    ${statusPill}
+                    <div class="pill-row">${statusPill}${cancelPill}</div>
                 </header>
                 <div class="order-items">${items}</div>
                 <div class="row"><span>Created</span><strong>${new Date(order.createdAt).toLocaleDateString()}</strong></div>
@@ -79,7 +84,7 @@
         event.preventDefault();
         const orderId = cancelOrderId.value;
         try {
-            await apiClient.cancelOrder(orderId);
+            await apiClient.cancelOrder(orderId, cancelReason.value.trim());
             await loadOrders();
             renderOrders();
         } catch (err) {

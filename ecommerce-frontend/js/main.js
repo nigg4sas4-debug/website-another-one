@@ -99,9 +99,11 @@
     await Promise.all([hydrateProducts(), window.updateCartBadges()]);
 })();
 
-function getPriceRange(product) {
+function getPriceRange(product, { useOriginal = false } = {}) {
     if (!product?.variations?.length) return "$0.00";
-    const prices = product.variations.flatMap((variation) => variation.sizes?.map((size) => size.price) || []);
+    const prices = product.variations.flatMap((variation) =>
+        variation.sizes?.map((size) => (useOriginal && size.originalPrice ? size.originalPrice : size.price)) || []
+    );
     const valid = prices.filter((p) => typeof p === "number");
     if (!valid.length) return "$0.00";
     const min = Math.min(...valid);
@@ -116,18 +118,23 @@ function renderProductCard(product) {
     const firstVariation = product.variations[0];
     console.log('renderProductCard image for', product.id, firstVariation?.image);
     const displayPrice = getPriceRange(product);
+    const originalPrice = product.onSale ? getPriceRange(product, { useOriginal: true }) : null;
     return `
         <a class="product-card" href="./product-detail.html?id=${product.id}">
             <div class="product-image" style="background-image: url('${firstVariation.image}')"></div>
             <div class="product-body">
                 <div class="product-meta">
                     <span class="pill">${product.category}</span>
+                    ${product.onSale ? `<span class="pill pill-sale">Sale</span>` : ""}
                     ${product.badges?.map((b) => `<span class="pill pill-accent">${b}</span>`).join("") || ""}
                 </div>
                 <h3>${product.name}</h3>
                 <p class="muted">${product.description}</p>
                 <div class="product-footer">
-                    <span class="price">${displayPrice}</span>
+                    <span class="price-group">
+                        <span class="price${product.onSale ? " sale" : ""}">${displayPrice}</span>
+                        ${product.onSale && originalPrice ? `<span class="price original">${originalPrice}</span>` : ""}
+                    </span>
                     <span class="rating">★ ${product.rating}</span>
                 </div>
             </div>
