@@ -397,26 +397,62 @@
             inventoryGrid.innerHTML = `<p class="muted">No inventory to manage.</p>`;
             return;
         }
-        const rows = [];
-        cachedProducts.forEach((product) => {
-            (product.variations || []).forEach((variation) => {
-                (variation.sizes || []).forEach((size) => {
-                    const displayPrice = size.originalPrice ?? size.price ?? 0;
-                    rows.push(`
-                        <article class="inventory-row" data-size-id="${size.id}">
-                            <div>
-                                <strong>${product.name}</strong>
-                                <p class="muted">${variation.name} · ${size.label}</p>
-                            </div>
-                            <label>Stock<input type="number" min="0" value="${size.stock}" data-stock-input></label>
-                            <label>Price<input type="number" min="0" step="0.01" value="${displayPrice}" data-price-input></label>
-                            <button type="button" class="btn ghost" data-update-size>Update</button>
-                        </article>
-                    `);
-                });
-            });
+
+        const productCards = cachedProducts.map((product) => {
+            const totalStock = (product.variations || [])
+                .flatMap((variation) => variation.sizes || [])
+                .reduce((sum, size) => sum + Number(size.stock || 0), 0);
+
+            const variationsHtml = (product.variations || [])
+                .map((variation) => {
+                    const sizesHtml = (variation.sizes || [])
+                        .map((size) => {
+                            const displayPrice = size.originalPrice ?? size.price ?? 0;
+                            return `
+                                <div class="inventory-size-row" data-size-id="${size.id}">
+                                    <div class="size-meta">
+                                        <span class="pill">${variation.name}</span>
+                                        <strong>${size.label}</strong>
+                                    </div>
+                                    <div class="size-inputs">
+                                        <label>Stock<input type="number" min="0" value="${size.stock}" data-stock-input></label>
+                                        <label>Price<input type="number" min="0" step="0.01" value="${displayPrice}" data-price-input></label>
+                                    </div>
+                                </div>
+                            `;
+                        })
+                        .join("");
+
+                    return `
+                        <div class="inventory-variation">
+                            <div class="inventory-variation__title">${variation.name}</div>
+                            <div class="inventory-sizes">${sizesHtml}</div>
+                        </div>
+                    `;
+                })
+                .join("");
+
+            return `
+                <article class="inventory-card" data-product-id="${product.id}">
+                    <header class="inventory-card__head">
+                        <div>
+                            <strong>${product.name}</strong>
+                            <p class="muted">${product.category || "Uncategorized"}</p>
+                        </div>
+                        <div class="inventory-card__meta">
+                            <span class="pill">Total stock: ${totalStock}</span>
+                            <span class="price">${window.getPriceRange?.(product)}</span>
+                        </div>
+                    </header>
+                    <div class="inventory-variations">${variationsHtml}</div>
+                    <div class="inventory-card__actions">
+                        <button type="button" class="btn ghost" data-update-product>Update stock</button>
+                    </div>
+                </article>
+            `;
         });
-        inventoryGrid.innerHTML = rows.join("");
+
+        inventoryGrid.innerHTML = productCards.join("");
     }
 
     async function loadProducts() {
@@ -548,19 +584,33 @@
     inventoryGrid?.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        if ('updateSize' in target.dataset) {
-            const row = target.closest("[data-size-id]");            const id = row?.dataset.sizeId;
-            const stockInput = row?.querySelector("[data-stock-input]");
-            const priceInput = row?.querySelector("[data-price-input]");
-            try {
-                await apiClient.updateSize(id, {
-                    stock: Number(stockInput.value || 0),
-                    price: Number(priceInput.value || 0),
-                });
-                await loadProducts();
-            } catch (err) {
-                alert(`Unable to update inventory: ${err.message}`);
-            }
+        const button = target.closest("[data-update-product]");
+        if (!button) return;
+
+        const card = button.closest("[data-product-id]");
+        if (!card) return;
+
+        const sizeRows = Array.from(card.querySelectorAll("[data-size-id]"));
+        const updates = sizeRows.map((row) => {
+            const id = row.dataset.sizeId;
+            const stockInput = row.querySelector("[data-stock-input]");
+            const priceInput = row.querySelector("[data-price-input]");
+            return apiClient.updateSize(id, {
+                stock: Number(stockInput?.value || 0),
+                price: Number(priceInput?.value || 0),
+            });
+        });
+
+        button.disabled = true;
+        button.textContent = "Updating...";
+        try {
+            await Promise.all(updates);
+            await loadProducts();
+        } catch (err) {
+            alert(`Unable to update inventory: ${err.message}`);
+        } finally {
+            button.disabled = false;
+            button.textContent = "Update stock";
         }
     });
 
