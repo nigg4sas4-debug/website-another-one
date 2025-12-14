@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../prisma");
-const { authenticate } = require("../middleware/auth");
+const { authenticate, requireRole } = require("../middleware/auth");
 const asyncHandler = require("../utils/asyncHandler");
 
 const router = express.Router();
@@ -24,6 +24,12 @@ function normalizeProductPayload(body) {
     categoryName: categoryName ? String(categoryName).trim() : undefined,
   };
 }
+
+function coerceNumber(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
 
 router.get(
   "/",
@@ -92,6 +98,11 @@ router.post(
     }
 
     const payload = normalizeProductPayload(req.body);
+    const variations = Array.isArray(req.body.variations) ? req.body.variations : [];
+    const derivedPrice = variations?.[0]?.sizes?.[0]?.price;
+
+    if (!payload.name || (payload.price == null && derivedPrice == null)) {
+
     if (!payload.name || payload.price == null) {
       return res.status(400).json({ message: "Name and price are required" });
     }
@@ -102,6 +113,8 @@ router.post(
       data: {
         name: payload.name,
         description: payload.description,
+        price: payload.price ?? coerceNumber(derivedPrice),
+
         price: payload.price,
         imageUrl: payload.imageUrl,
         stock: payload.stock || 0,
@@ -111,6 +124,8 @@ router.post(
         categoryId: category?.id ?? null,
       },
     });
+
+    await replaceVariations(product.id, variations);
 
     await replaceVariations(product.id, req.body.variations);
 
@@ -138,6 +153,61 @@ router.patch(
     if (!existing) return res.status(404).json({ message: "Product not found" });
 
     const category = payload.categoryName ? await resolveCategory(payload.categoryName) : null;
+
+    const variations = Array.isArray(req.body.variations) ? req.body.variations : null;
+
+    await prisma.product.update({
+      where: { id },
+      data: {
+        name: payload.name ?? existing.name,
+        description: payload.description ?? existing.description,
+        price:
+          payload.price == null
+            ? variations?.[0]?.sizes?.[0]?.price ?? existing.price
+            : payload.price,
+        imageUrl: payload.imageUrl === undefined ? existing.imageUrl : payload.imageUrl,
+        stock: payload.stock == null ? existing.stock : payload.stock,
+        featured: payload.featured ?? existing.featured,
+        onSale: payload.onSale ?? existing.onSale,
+        discountPct: payload.discountPct ?? existing.discountPct,
+        categoryId: category ? category.id : payload.categoryName === null ? null : existing.categoryId,
+      },
+    });
+
+    if (variations) {
+      await replaceVariations(id, variations);
+    }
+
+    const updated = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true, variations: { include: { sizes: true } } },
+    });
+
+    res.json(updated);
+  })
+);
+
+// Admin: update stock/price for a single size
+router.patch(
+  "/sizes/:id",
+  requireRole("ADMIN"),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const payload = {
+      stock: req.body.stock == null ? undefined : coerceNumber(req.body.stock),
+      price: req.body.price == null ? undefined : coerceNumber(req.body.price),
+      label: req.body.label,
+    };
+
+    const size = await prisma.variationSize.findUnique({ where: { id } });
+    if (!size) return res.status(404).json({ message: "Size not found" });
+
+    const updated = await prisma.variationSize.update({
+      where: { id },
+      data: {
+        stock: payload.stock ?? size.stock,
+        price: payload.price ?? size.price,
+        label: payload.label ?? size.label,
 
     await prisma.product.update({
       where: { id },

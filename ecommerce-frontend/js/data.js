@@ -56,6 +56,8 @@ async function apiRequest(path, options = {}) {
 function normalizeProduct(product) {
     const image = product.imageUrl || ImageFactory.createPlaceholder(product.name || "Product");
     const baseCategory = product.category?.name || product.category || "Essentials";
+    const discountPct = Number(product.discountPct ?? 0);
+    const onSale = discountPct > 0 || Boolean(product.onSale);
     const discountPct = Number(product.discountPct || 0);
     const onSale = Boolean(product.onSale) && discountPct > 0;
     const variations = (product.variations || []).length
@@ -81,6 +83,7 @@ function normalizeProduct(product) {
         gallery: variation.gallery || [image],
         sizes: (variation.sizes || []).map((size) => {
             const originalPrice = Number(size.price ?? product.price ?? 0);
+            const finalPrice = discountPct > 0 ? originalPrice * (1 - discountPct / 100) : originalPrice;
             const finalPrice = onSale ? originalPrice * (1 - discountPct / 100) : originalPrice;
             return {
                 ...size,
@@ -174,6 +177,21 @@ const apiClient = {
     async createOrder(shipping) {
         const order = await apiRequest("/orders", { method: "POST", body: JSON.stringify({ shipping }) });
         return order;
+    },
+    async listCategories() {
+        return apiRequest("/categories", { method: "GET" });
+    },
+    async createCategory(name) {
+        return apiRequest("/categories", { method: "POST", body: JSON.stringify({ name }) });
+    },
+    async updateCategory(id, name) {
+        return apiRequest(`/categories/${id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+    },
+    async deleteCategory(id) {
+        return apiRequest(`/categories/${id}`, { method: "DELETE" });
+    },
+    async updateSize(id, payload) {
+        return apiRequest(`/products/sizes/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
     },
     async listOrders() {
         const orders = await apiRequest("/orders", { method: "GET" });

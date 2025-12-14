@@ -4,6 +4,7 @@ const path = require("path");
 const config = require("./config");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
+const categoryRoutes = require("./routes/categories");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/orders");
 const { PrismaClient } = require("@prisma/client");
@@ -38,6 +39,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
+app.use("/categories", categoryRoutes);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 

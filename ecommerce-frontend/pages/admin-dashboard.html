@@ -46,36 +46,52 @@
             </ul>
         </aside>
         <section class="admin-content">
+            <section id="categories">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Admin</p>
+                        <h1>Manage categories</h1>
+                        <p class="muted">Create, rename, or remove catalog categories for products.</p>
+                    </div>
+                </div>
+                <form id="category-form" class="stacked inline">
+                    <label>Category name<input required name="name" type="text" placeholder="e.g. Shirts"></label>
+                    <button class="btn" type="submit">Add category</button>
+                </form>
+                <div id="category-list" class="admin-list"></div>
+            </section>
+
             <div class="section-header" id="products">
                 <div>
                     <p class="eyebrow">Admin</p>
-                    <h1>Product creation</h1>
+                    <h2>Create a product</h2>
+                    <p class="muted">Attach the product to a category, configure featured/sale flags, and add size-level pricing.</p>
                 </div>
             </div>
             <form id="product-form" class="stacked">
                 <div class="grid-2">
                     <label>Name<input required name="name" type="text" placeholder="Product name"></label>
-                    <label>Category<input required name="category" type="text" placeholder="e.g. Shirts"></label>
+                    <label>Product Image URL<input name="imageUrl" type="url" placeholder="https://.../image.png"></label>
                 </div>
                 <div class="grid-2">
-                    <label>Base Price<input required name="price" type="number" step="0.01" placeholder="50"></label>
+                    <label>Category
+                        <select id="product-category" name="category" required>
+                            <option value="">Select a category</option>
+                        </select>
+                    </label>
                     <label>Featured<input name="featured" type="checkbox"></label>
                 </div>
-                <label>Product Images<input name="images" type="file" accept="image/*" multiple></label>
                 <label>Description<textarea name="description" placeholder="Detail the fabric, fit, and care"></textarea></label>
+                <div class="grid-2">
+                    <label class="checkbox-inline"><input id="product-sale" name="sale" type="checkbox"> Sale</label>
+                    <label id="discount-wrapper" class="hidden">Discount %<input id="discount-pct" name="discountPct" type="number" min="0" max="90" step="1" placeholder="10"></label>
+                </div>
                 <div>
-                    <p class="muted">Add multiple variations to capture colorways or fabric changes. Use size:stock:price pairs separated by commas (e.g., S:10:48,M:6:50).</p>
-                    <div id="variation-list" class="variation-list">
-                        <div class="variation-row">
-                            <div class="grid-2">
-                                <label>Variation Name<input name="variation" type="text" placeholder="Plain"></label>
-                                <label>Sizes, Stock & Prices<input name="sizes" type="text" placeholder="S:10:50,M:6:52,L:2:54"></label>
-                            </div>
-                            <div class="variation-actions">
-                                <button type="button" class="link remove-variation" aria-label="Remove variation">Remove</button>
-                            </div>
-                        </div>
+                    <div class="section-subhead">
+                        <h3>Variations & sizes</h3>
+                        <p class="muted">Add a variation (e.g., Plain or Printed), then add sizes with stock and price per size.</p>
                     </div>
+                    <div id="variation-list" class="variation-list"></div>
                     <div class="variation-actions">
                         <button type="button" id="add-variation" class="btn ghost">Add another variation</button>
                     </div>
@@ -88,9 +104,10 @@
                     <div>
                         <p class="eyebrow">Inventory</p>
                         <h2>Live stock by size</h2>
+                        <p class="muted">Update quantity or price for any variation size directly.</p>
                     </div>
                 </div>
-                <div id="inventory-grid" class="order-grid"></div>
+                <div id="inventory-grid" class="inventory-grid"></div>
             </section>
 
             <section id="orders">
@@ -114,6 +131,11 @@
                         <p class="eyebrow">Cancellations</p>
                         <h2>Review requests</h2>
                     </div>
+                </div>
+                <div class="tab-list" id="cancel-tabs">
+                    <button type="button" class="active" data-cancel-tab="PENDING">Pending</button>
+                    <button type="button" data-cancel-tab="REJECTED">Rejected</button>
+                    <button type="button" data-cancel-tab="SUCCESS">Successful</button>
                 </div>
                 <div id="cancellation-requests" class="order-grid"></div>
             </section>
