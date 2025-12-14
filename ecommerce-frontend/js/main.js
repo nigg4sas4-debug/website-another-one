@@ -101,13 +101,25 @@
 
 function getPriceRange(product, { useOriginal = false } = {}) {
     if (!product?.variations?.length) return "$0.00";
-    const prices = product.variations.flatMap((variation) =>
-        variation.sizes?.map((size) => (useOriginal && size.originalPrice ? size.originalPrice : size.price)) || []
+
+    const priceForSize = (size) => {
+        const raw = useOriginal && size.originalPrice != null ? size.originalPrice : size.price;
+        return Number(raw);
+    };
+
+    const availableSizes = product.variations.flatMap((variation) =>
+        variation.sizes?.filter((size) => Number(size.stock) > 0 && priceForSize(size) > 0) || []
     );
-    const valid = prices.filter((p) => typeof p === "number");
-    if (!valid.length) return "$0.00";
-    const min = Math.min(...valid);
-    const max = Math.max(...valid);
+
+    const sourceSizes = availableSizes.length
+        ? availableSizes
+        : product.variations.flatMap((variation) => variation.sizes || []);
+
+    const prices = sourceSizes.map(priceForSize).filter((p) => Number.isFinite(p) && p > 0);
+    if (!prices.length) return "$0.00";
+
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
     if (min === max) return `$${min.toFixed(2)}`;
     return `$${min.toFixed(2)} - $${max.toFixed(2)}`;
 }

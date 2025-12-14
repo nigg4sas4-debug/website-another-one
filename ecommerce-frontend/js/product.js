@@ -81,8 +81,9 @@
 
     function updateSizes(showSelectedPrice = false) {
         const selectedVariation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
+        const preferredSize = selectedVariation.sizes.find((s) => Number(s.stock) > 0) || selectedVariation.sizes[0];
         sizeSelect.innerHTML = selectedVariation.sizes
-            .map((size) => `<option value="${size.label}">${size.label}</option>`)
+            .map((size) => `<option value="${size.label}" ${preferredSize?.label === size.label ? "selected" : ""}>${size.label}</option>`)
             .join("");
         renderGallery(selectedVariation);
         updateStock(showSelectedPrice);
@@ -90,7 +91,7 @@
 
     function updateStock(showSelectedPrice = true) {
         const variation = product.variations.find((v) => v.name === variationSelect.value) || product.variations[0];
-        const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes[0];
+        const size = variation.sizes.find((s) => s.label === sizeSelect.value) || variation.sizes.find((s) => Number(s.stock) > 0) || variation.sizes[0];
         if (!size) return;
         stockCount.textContent = `${size.stock} in stock`;
         if (product.onSale && size.originalPrice && showSelectedPrice) {
