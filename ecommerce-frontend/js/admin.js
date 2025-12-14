@@ -242,6 +242,18 @@
             orderList.innerHTML = filtered
                 .map(
                     (order) => `
+
+            const [orders, cancellations] = await Promise.all([
+                apiClient.listOrders(),
+                apiClient.listCancellations(),
+            ]);
+
+            if (orderList) {
+                const selectedTab = document.querySelector('[data-status-tab].active')?.dataset.statusTab?.toUpperCase();
+                const filtered = selectedTab ? orders.filter((o) => o.status === selectedTab) : orders;
+                orderList.innerHTML = filtered
+                    .map(
+                        (order) => `
                     <article class="order-card" data-id="${order.id}">
                         <div>
                             <strong>Order ${order.id}</strong>
@@ -273,6 +285,38 @@
             if (!filtered.length) {
                 cancellationList.innerHTML = `<p class="muted">No ${selectedTab.toLowerCase()} requests.</p>`;
                 return;
+                    )
+                    .join("");
+            }
+            if (cancellationList) {
+                const grouped = { PENDING: [], REJECTED: [], SUCCESS: [] };
+                (cancellations || []).forEach((req) => {
+                    grouped[req.status]?.push(req);
+                });
+                cancellationList.innerHTML = Object.entries(grouped)
+                    .map(([status, list]) => `
+                        <div class="stacked">
+                            <h4>${status}</h4>
+                            ${list
+                                .map(
+                                    (req) => `
+                                        <article class="order-card" data-cancel-id="${req.id}">
+                                            <div>
+                                                <strong>Order ${req.orderId}</strong>
+                                                <p class="muted">${req.reason || "Customer request"}</p>
+                                            </div>
+                                            <select data-action="cancel-status">
+                                                ${["PENDING", "REJECTED", "SUCCESS"].map(
+                                                    (opt) => `<option value="${opt}" ${req.status === opt ? "selected" : ""}>${opt}</option>`
+                                                ).join("")}
+                                            </select>
+                                        </article>
+                                    `
+                                )
+                                .join("") || `<p class="muted">No ${status.toLowerCase()} requests</p>`}
+                        </div>
+                    `)
+                    .join("");
             }
             cancellationList.innerHTML = filtered
                 .map(
@@ -308,6 +352,23 @@
                 alert(`Unable to update order: ${err.message}`);
             }
         }
+        if (target instanceof HTMLSelectElement && target.dataset.action === "cancel-status") {
+            const cancelId = target.closest(".order-card")?.dataset.cancelId;
+            const status = target.value;
+            try {
+                await apiClient.updateCancellation(cancelId, status);
+            } catch (err) {
+                alert(`Unable to update cancellation: ${err.message}`);
+            }
+        }
+    });
+
+    document.querySelectorAll('[data-status-tab]').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            document.querySelectorAll('[data-status-tab]').forEach((b) => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            loadOrders();
+        });
     });
 
     cancellationList?.addEventListener("change", async (event) => {

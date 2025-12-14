@@ -73,6 +73,8 @@ DROP TABLE "Product";
 ALTER TABLE "new_Product" RENAME TO "Product";
 
 -- Ensure duplicate product names are made unique before enforcing constraint
+
+-- Deduplicate product names before enforcing uniqueness
 WITH duplicates AS (
     SELECT
         id,
@@ -83,6 +85,11 @@ WITH duplicates AS (
 UPDATE "Product"
 SET name = name || '-' || id
 WHERE id IN (SELECT id FROM duplicates WHERE rn > 1);
+
+SET name = name || '-dup-' || id
+WHERE id IN (
+    SELECT id FROM duplicates WHERE rn > 1
+);
 
 CREATE UNIQUE INDEX "Product_name_key" ON "Product"("name");
 PRAGMA foreign_keys=ON;
