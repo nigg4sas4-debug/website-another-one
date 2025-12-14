@@ -71,6 +71,21 @@ CREATE TABLE "new_Product" (
 INSERT INTO "new_Product" ("createdAt", "description", "id", "imageUrl", "name", "price", "stock", "updatedAt") SELECT "createdAt", "description", "id", "imageUrl", "name", "price", "stock", "updatedAt" FROM "Product";
 DROP TABLE "Product";
 ALTER TABLE "new_Product" RENAME TO "Product";
+
+-- Deduplicate product names before enforcing uniqueness
+WITH duplicates AS (
+    SELECT
+        id,
+        name,
+        ROW_NUMBER() OVER (PARTITION BY name ORDER BY id) AS rn
+    FROM "Product"
+)
+UPDATE "Product"
+SET name = name || '-dup-' || id
+WHERE id IN (
+    SELECT id FROM duplicates WHERE rn > 1
+);
+
 CREATE UNIQUE INDEX "Product_name_key" ON "Product"("name");
 PRAGMA foreign_keys=ON;
 PRAGMA defer_foreign_keys=OFF;
