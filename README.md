@@ -54,7 +54,7 @@ This project now contains a static frontend for an e-commerce experience **and a
   - `GET /orders` (admin)
   - `PATCH /orders/:id/status` (admin fulfill/cancel/update)
 
-Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/prisma/seed.js` (admin user + sample products).
+Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/prisma/seed.js` (admin user + sample products). See `backend/prisma/ERD.md` for a rendered ER diagram (Mermaid).
 
 ## Frontend integration steps
 1. Create a small `js/api.js` helper that wraps `fetch` with the API base URL and auth headers.
