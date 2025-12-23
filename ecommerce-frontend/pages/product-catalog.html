@@ -25,7 +25,6 @@
             </ul>
         </nav>
         <div class="header-actions">
-            <a class="pill" href="./settings.html" title="Settings"><i class="fa-solid fa-gear"></i></a>
             <a class="pill" href="./cart.html">Cart <span class="count-badge" data-cart-count>0</span></a>
             <a class="pill" href="./login.html">Login</a>
             <a class="pill pill-accent" href="./signup.html">Sign up</a>
@@ -48,33 +47,21 @@
                 <h2>Filters</h2>
                 <button id="clear-filters" class="link">Clear</button>
             </div>
-            <label>Category
-                <select id="filter-category">
-                    <option value="">All</option>
-                </select>
-            </label>
-            <label>Size
-                <select id="filter-size">
-                    <option value="">All</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="30">30</option>
-                    <option value="32">32</option>
-                    <option value="34">34</option>
-                </select>
-            </label>
-            <label>Availability
-                <select id="filter-availability">
-                    <option value="">Any</option>
-                    <option value="in">In stock</option>
-                    <option value="out">Out of stock</option>
-                </select>
-            </label>
-            <label>Price up to
-                <input type="range" id="filter-price" min="20" max="100" value="100">
-                <span id="price-value">$100</span>
-            </label>
+            
+            <div class="filter-group">
+                <h3>Categories</h3>
+                <div id="category-filters" class="checkbox-list">
+                    <!-- Dynamic checkboxes will be injected here -->
+                    <p class="muted">Loading categories...</p>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3>Price Range</h3>
+                <label>Max Price: <span id="price-value">$100</span>
+                    <input type="range" id="filter-price" min="0" max="500" step="10" value="500">
+                </label>
+            </div>
         </aside>
         <section>
             <div class="section-header">
@@ -181,5 +168,6 @@
     <script src="../js/data.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/search.js"></script>
+    <script src="../js/catalog.js"></script>
 </body>
 </html>

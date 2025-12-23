@@ -50,8 +50,8 @@
         row.className = "size-row";
         row.innerHTML = `
             <label>Size<input name="size-label" type="text" value="${label}" placeholder="S"></label>
-            <label>Price<input name="size-price" type="number" min="0" step="0.01" value="${price}" placeholder="50"></label>
-            <button type="button" class="link" data-remove-size>Remove</button>
+            <label>Price<input name="size-price" type="number" min="0" step="0.01" value="${price}" placeholder="0.00"></label>
+            <button type="button" class="btn sm ghost danger" data-remove-size>Remove</button>
         `;
         return row;
     }
@@ -241,60 +241,80 @@
     function openEditProductModal(product) {
         const modalHtml = `
     <div class="modal-overlay show" id="edit-product-modal">
-        <div class="modal elevated" style="max-width: 860px; overflow-y: auto; max-height: 90vh;">
+        <div class="modal elevated modal-content-scrollable">
             <header class="modal-head">
                 <div>
                     <p class="eyebrow">Editing</p>
                     <h2>${product.name}</h2>
-                    <p class="muted">Organized variations, fast stock tweaks, and lifecycle actions.</p>
+                    <p class="muted">Manage details, pricing, and variations.</p>
                 </div>
                 <div class="modal-head__actions">
-                    <button type="button" class="btn danger ghost" id="soft-delete-product">Move to trash</button>
+                    <button type="button" class="btn danger ghost" id="soft-delete-product">Trash</button>
                     <button class="btn ghost" type="button" onclick="closeEditModal()">Close</button>
                 </div>
             </header>
             <form id="edit-product-form" class="stacked sleek-form">
                 <input type="hidden" name="productId" value="${product.id}">
-                <div class="grid-2">
-                    <label>Name<input required name="name" type="text" value="${product.name}"></label>
-                    <label>Category
-                        <select name="category">
-                            ${cachedCategories.map(cat => `<option value="${cat.name}" ${product.category?.name === cat.name || product.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
-                        </select>
-                    </label>
-                </div>
-                <label>Description<textarea name="description">${product.description}</textarea></label>
-                <div class="grid-2">
-                    <label class="checkbox-inline"><input name="featured" type="checkbox" ${product.featured ? 'checked' : ''}> Featured</label>
-                    <label class="checkbox-inline"><input name="sale" type="checkbox" ${product.onSale ? 'checked' : ''}> Sale</label>
-                </div>
-                <label>Discount %<input name="discountPct" type="number" min="0" max="90" step="1" value="${product.discountPct || ''}"></label>
+                
+                <section class="form-section">
+                    <h4 class="section-title-sm">Basic Information</h4>
+                    <div class="grid-2">
+                        <label>Name<input required name="name" type="text" value="${product.name}"></label>
+                        <label>Category
+                            <select name="category">
+                                ${cachedCategories.map(cat => `<option value="${cat.name}" ${product.category?.name === cat.name || product.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                            </select>
+                        </label>
+                    </div>
+                    <label>Description<textarea name="description" rows="3">${product.description}</textarea></label>
+                </section>
 
-                <h3>Variations & Sizes</h3>
-                <div id="edit-variation-list" class="variation-grid">
-                    ${product.variations.map(v => `
-                        <div class="variation-card" data-variation-id="${v.id}">
-                            <label>Variation Name<input name="variation-name" value="${v.name}"></label>
-                            <div class="size-list">
-                                ${v.sizes.map(s => `
-                                    <div class="size-row" data-size-id="${s.id}">
-                                        <label>Size<input name="size-label" value="${s.label}"></label>
-                                        <label>Price<input name="size-price" value="${s.price}"></label>
-                                        <button type="button" class="link" data-remove-size>Remove</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div class="variation-actions">
-                                <button type="button" class="btn ghost" data-add-size>Add Size</button>
-                                <button type="button" class="btn danger ghost" data-remove-variation>Remove Variation</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <button type="button" class="btn ghost" id="add-edit-variation">Add Variation</button>
+                <section class="form-section muted-bg">
+                    <h4 class="section-title-sm">Marketing & Pricing</h4>
+                    <div class="grid-3 align-end">
+                        <label class="checkbox-wrapper">
+                            <input name="featured" type="checkbox" ${product.featured ? 'checked' : ''}>
+                            <span>Featured Product</span>
+                        </label>
+                        <label class="checkbox-wrapper">
+                            <input name="sale" type="checkbox" ${product.onSale ? 'checked' : ''}>
+                            <span>On Sale</span>
+                        </label>
+                        <label>Discount %<input name="discountPct" type="number" min="0" max="90" step="1" value="${product.discountPct || ''}"></label>
+                    </div>
+                </section>
 
-                <div class="actions">
-                    <button type="submit" class="btn">Save Changes</button>
+                <section class="form-section">
+                    <div class="flex-between">
+                        <h4 class="section-title-sm">Variations & Sizes</h4>
+                        <button type="button" class="btn sm ghost" id="add-edit-variation">+ Add Variation</button>
+                    </div>
+                    <div id="edit-variation-list" class="variation-stack">
+                        ${product.variations.map(v => `
+                            <div class="variation-card" data-variation-id="${v.id}">
+                                <div class="variation-header">
+                                    <label class="flex-grow">Variation Name (e.g. Color)<input name="variation-name" value="${v.name}" placeholder="e.g. Blue"></label>
+                                    <button type="button" class="btn icon-only danger ghost" data-remove-variation title="Remove Variation">&times;</button>
+                                </div>
+                                <div class="size-list">
+                                    ${v.sizes.map(s => `
+                                        <div class="size-row" data-size-id="${s.id}">
+                                            <label>Size<input name="size-label" value="${s.label}" placeholder="S, M, L"></label>
+                                            <label>Price<input name="size-price" type="number" value="${s.price}" placeholder="0.00"></label>
+                                            <button type="button" class="btn sm ghost danger" data-remove-size>Remove</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="variation-footer">
+                                    <button type="button" class="btn sm ghost" data-add-size>+ Add Size</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+
+                <div class="modal-footer actions">
+                    <button type="submit" class="btn full-width">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -334,14 +354,17 @@
             const variationList = document.getElementById('edit-variation-list');
             const block = document.createElement("div");
             block.className = "variation-card";
+            block.dataset.variationId = 'new_' + Date.now();
             block.innerHTML = `
-            <label>Variation Name<input name="variation-name" value="New Variation"></label>
+            <div class="variation-header">
+                <label class="flex-grow">Variation Name (e.g. Color)<input name="variation-name" value="New Variation" placeholder="e.g. Blue"></label>
+                <button type="button" class="btn icon-only danger ghost" data-remove-variation title="Remove Variation">&times;</button>
+            </div>
             <div class="size-list">
                 ${createSizeRow({label: 'S'}).outerHTML}
             </div>
-            <div class="variation-actions">
-                <button type="button" class="btn ghost" data-add-size>Add Size</button>
-                <button type="button" class="btn danger ghost" data-remove-variation>Remove Variation</button>
+            <div class="variation-footer">
+                <button type="button" class="btn sm ghost" data-add-size>+ Add Size</button>
             </div>
         `;
             variationList.appendChild(block);

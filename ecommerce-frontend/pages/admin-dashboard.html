@@ -22,7 +22,6 @@
             </ul>
         </nav>
         <div class="header-actions">
-            <a class="pill" href="./settings.html" title="Settings"><i class="fa-solid fa-gear"></i></a>
             <a class="pill" href="./login.html">Logout</a>
             <div id="hamburger-menu" class="hamburger-menu" aria-label="Toggle menu" tabindex="0">
                 <span></span><span></span><span></span>
@@ -61,42 +60,44 @@
                 <div id="category-list" class="admin-list"></div>
             </section>
 
-            <div class="section-header" id="products">
-                <div>
-                    <p class="eyebrow">Admin</p>
-                    <h2>Create a product</h2>
-                    <p class="muted">Attach the product to a category, configure featured/sale flags, and add size-level pricing.</p>
-                </div>
-            </div>
-            <form id="product-form" class="stacked">
-                <div class="grid-2">
-                    <label>Name<input required name="name" type="text" placeholder="Product name"></label>
-                    <label>Product Image<input id="product-image-upload" name="imageUpload" type="file" accept="image/*"></label>
-                    <div class="product-image-preview">
-                        <img id="product-image-preview" src="" alt="Image Preview" class="hidden">
-                        <input type="hidden" name="base64Image" id="base64-image-hidden">
+            <section id="create-product">
+                <div class="section-header" id="products">
+                    <div>
+                        <p class="eyebrow">Admin</p>
+                        <h2>Create a product</h2>
+                        <p class="muted">Attach the product to a category, configure featured/sale flags, and add size-level pricing.</p>
                     </div>
                 </div>
-                <div class="grid-2">
-                    <label>Category
-                        <select id="product-category" name="category" required>
-                            <option value="">Select a category</option>
-                        </select>
-                    </label>
-                </div>
-                <label>Description<textarea name="description" placeholder="Detail the fabric, fit, and care"></textarea></label>
-                <div>
-                    <div class="section-subhead">
-                        <h3>Variations & sizes</h3>
-                        <p class="muted">Add a variation (e.g., Plain or Printed), then add sizes with stock and price per size.</p>
+                <form id="product-form" class="stacked">
+                    <div class="grid-2">
+                        <label>Name<input required name="name" type="text" placeholder="Product name"></label>
+                        <label>Product Image<input id="product-image-upload" name="imageUpload" type="file" accept="image/*"></label>
+                        <div class="product-image-preview">
+                            <img id="product-image-preview" src="" alt="Image Preview" class="hidden">
+                            <input type="hidden" name="base64Image" id="base64-image-hidden">
+                        </div>
                     </div>
-                    <div id="variation-list" class="variation-list"></div>
-                    <div class="variation-actions">
-                        <button type="button" id="add-variation" class="btn ghost">Add another variation</button>
+                    <div class="grid-2">
+                        <label>Category
+                            <select id="product-category" name="category" required>
+                                <option value="">Select a category</option>
+                            </select>
+                        </label>
                     </div>
-                </div>
-                <button class="btn" type="submit">Add product</button>
-            </form>
+                    <label>Description<textarea name="description" placeholder="Detail the fabric, fit, and care"></textarea></label>
+                    <div>
+                        <div class="section-subhead">
+                            <h3>Variations & sizes</h3>
+                            <p class="muted">Add a variation (e.g., Plain or Printed), then add sizes with stock and price per size.</p>
+                        </div>
+                        <div id="variation-list" class="variation-list"></div>
+                        <div class="variation-actions">
+                            <button type="button" id="add-variation" class="btn ghost">Add another variation</button>
+                        </div>
+                    </div>
+                    <button class="btn" type="submit">Add product</button>
+                </form>
+            </section>
 
             <section id="edit-products">
                 <div class="section-header">

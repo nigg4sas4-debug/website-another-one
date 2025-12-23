@@ -152,17 +152,7 @@
                 const featured = products.slice(0, 6);
                 featuredGrid.innerHTML = featured.map((product) => renderProductCard(product)).join("");
             }
-            if (catalogGrid) {
-                // support optional search term
-                const term = sessionStorage.getItem("searchTerm");
-                let shown = products;
-                if (term) {
-                    const t = term.toLowerCase();
-                    shown = products.filter((p) => (p.name || "").toLowerCase().includes(t) || (p.description || "").toLowerCase().includes(t));
-                    sessionStorage.removeItem("searchTerm");
-                }
-                catalogGrid.innerHTML = shown.map((product) => renderProductCard(product)).join("");
-            }
+            // catalogGrid logic removed - handled by catalog.js
             if (categoryGrid) {
                 const categories = [...new Set(products.map((p) => p.category || "Essentials"))];
                 categoryGrid.innerHTML = categories
