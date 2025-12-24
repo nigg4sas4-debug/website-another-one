@@ -43,6 +43,24 @@ This project now contains a static frontend for an e-commerce experience **and a
    ```
    In this mode, ensure `CORS_ORIGIN` in `backend/.env` includes the frontend origin (e.g., `http://localhost:5500`).
 
+## Project Architecture
+This project is a full-stack ecommerce application consisting of a Node.js/Express backend and a static HTML/JS frontend.
+
+### Backend & API
+- **Framework:** Express.js handles HTTP requests and API routing (`backend/src/index.js`).
+- **Data Access:** Prisma ORM is used to interact with the database using JavaScript objects instead of raw SQL.
+- **API Routes:** Located in `backend/src/routes/`, handling:
+    - `auth.js`: User authentication (login, signup, JWT).
+    - `products.js`: Product management (listing, creation, variants, soft-delete).
+    - `categories.js`: Product categorization.
+    - `cart.js`: User shopping carts.
+    - `orders.js`: Order processing and tracking.
+
+### Database
+- **Provider:** SQLite (file-based database).
+- **Configuration:** Defined in `backend/prisma/schema.prisma`.
+- **Location:** The database file is typically found at `backend/prisma/dev.db`.
+
 ## Core API surface (implemented)
 - **Health:** `GET /health`
 - **Auth:** `POST /auth/register`, `POST /auth/login`, `GET /me` (JWT bearer tokens)
@@ -55,6 +73,15 @@ This project now contains a static frontend for an e-commerce experience **and a
   - `PATCH /orders/:id/status` (admin fulfill/cancel/update)
 
 Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/prisma/seed.js` (admin user + sample products). See `backend/prisma/ERD.md` for a rendered ER diagram (Mermaid).
+
+## Features & Admin Usage
+- **Authentication:** Users must sign up and log in to access certain features like account management and checkout.
+- **Admin Dashboard:**
+  - **Credentials:** `admin@example.com` / `password: admin123`
+  - **Inventory:** Add products with variants (sizes, stocks, and specific prices).
+  - **Sale Management:** Toggle "On Sale" status and set discount percentages for automatic calculation.
+  - **Order Management:** Manage order statuses and handle cancellation requests.
+  - **Categories:** Create and manage product categories.
 
 ## Frontend integration steps
 1. Create a small `js/api.js` helper that wraps `fetch` with the API base URL and auth headers.
@@ -89,28 +116,3 @@ Data model lives in `backend/prisma/schema.prisma` with seed data in `backend/pr
 - [x] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Swap frontend data access to the API helper and test flows end-to-end.
 - [ ] Add payment endpoints when you are ready to integrate a provider.
-
-Ito na basahin mo pre
-
-
-may mga functionalities na bago pre, yung account, di na pwede yung kahit ano lang, kailangan  mo na magsign up. Tsaka sa admin pre local palang ung accoutn nyan, 'admin@example.com' tapos password ay 'admin123'
-
-Pwede ka na mag add ng mga products pre, tapos mga varianst, tapos kada variant pwede ka maglagay ng stocks sa mga sizes na available then yung price. 
-
-eto pre, kunwari wlaa kang stocks ng xxl size, iwan mo lang na blank, automatic na yun na stock 0 yun.
-
-Tapos kung gusto mo mag sale pre, punta ks sa edit product, piliin mo ung gusto mo iedit pre, tapos andun na yun gmga pwede mmong iedit. 
-Tapos ung sa sale, i check molang ynu pre, tapos lagay mo kung ilng percent yung sale mo. Automatic na calculate yun.
-
-sa taas din pala pre, pwede ka mag add ng categories. wag nalang muna mag delete lalo na pag may nakalagay na "1 products" mahigit, kasi diko alam kung anomangyayari dun.
-
-gumagana naman na ynug manage orders tsaka cancellations pre. Pag binago mo ung status, malilipat ng tab yun, based sa status nya.
-
-!!!!
-sa pag run pala pre
-
-eto
-cd backend
-npm run dev
-
-pag may error pre, kahit i-gemini nalang muna, kasi di ako sure kung paano maayos pag nag error sa pag run

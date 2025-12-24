@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact</title>
+    <title>Contact Us - Eterna Luxe</title>
     <link rel="stylesheet" href="../css/main.css?v=3">
     <link rel="stylesheet" href="../css/footer.css?v=3">
-    <link rel="stylesheet" href="../css/product.css?v=3">
+    <link rel="stylesheet" href="../css/contact.css?v=1">
 </head>
 <body>
     <header class="site-header">
@@ -36,123 +36,198 @@
         </div>
     </header>
 
-    <main class="section contact-layout">
-        <section class="stacked">
-            <div class="section-header">
-                <div>
-                    <p class="eyebrow">Contact</p>
-                    <h1>We're here to help</h1>
+    <main class="section contact-page">
+        <div class="section-inner">
+            <div class="contact-header">
+                <p class="eyebrow">Get in touch</p>
+                <h1>We're here to help</h1>
+                <p class="muted">Have a question about our products, orders, or just want to say hello? Our team is ready to assist you.</p>
+            </div>
+
+            <div class="contact-layout">
+                <section class="form-card">
+                    <form class="stacked">
+                        <div class="grid-2">
+                            <label>First name
+                                <input type="text" required placeholder="Jade?" name="firstName">
+                            </label>
+                            <label>Last name
+                                <input type="text" required placeholder="Villamor?" name="lastName">
+                            </label>
+                        </div>
+                        
+                        <label>Email address
+                            <input type="email" required placeholder="yourEmail@email.com" name="email">
+                        </label>
+                        
+                        <div class="grid-2">
+                            <label>Phone number (optional)
+                                <input type="tel" placeholder="+63 123 456 7890" name="phone">
+                            </label>
+                            <label>Topic
+                                <select name="topic">
+                                    <option value="general">General inquiry</option>
+                                    <option value="order">Order status</option>
+                                    <option value="returns">Returns & Exchanges</option>
+                                    <option value="product">Product styling</option>
+                                </select>
+                            </label>
+                        </div>
+                        
+                        <label>Message
+                            <textarea rows="6" placeholder="How can we help you?" name="message" required></textarea>
+                        </label>
+                        
+                        <button class="btn full-width" type="submit">Send message</button>
+                    </form>
+                </section>
+
+                <aside class="contact-sidebar">
+                    <div class="info-card">
+                        <ul class="contact-list">
+                            <li>
+                                <div class="contact-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                </div>
+                                <div class="contact-item-content">
+                                    <strong>Email us</strong>
+                                    <p>We'll get back to you within 24 hours.</p>
+                                    <a href="mailto:jaymersongandecila@gmail.com" class="link">jaymerson@gmail.com</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="contact-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                </div>
+                                <div class="contact-item-content">
+                                    <strong>Call us</strong>
+                                    <p>Mon-Fri from 9am to 6pm EST.</p>
+                                    <a href="tel:+639267117033" class="link">+63 926 711 7033</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="contact-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                </div>
+                                <div class="contact-item-content">
+                                    <strong>Visit our studio</strong>
+                                    <p>Fourth Estate, Fame St. Brgy. San Antonio<br>Paranaque City, Metro Manila 1700</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="faq-section">
+                <h2>Frequently asked questions</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h3>What is your return policy?</h3>
+                        <p>We accept returns within 30 days of purchase. Items must be unworn, unwashed, and with original tags attached.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>How do I track my order?</h3>
+                        <p>Once your order ships, you'll receive a confirmation email with a tracking number. You can also track it on our <a href="./order-tracking.html" class="link">Order Tracking</a> page.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Do you ship internationally?</h3>
+                        <p>Yes, we ship to over 50 countries worldwide. Shipping costs and delivery times vary by location and are calculated at checkout.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h3>Can I change my order after placing it?</h3>
+                        <p>We process orders quickly, but if you contact us within 1 hour of placing your order, we may be able to make changes.</p>
+                    </div>
                 </div>
             </div>
-            <form class="stacked form-card">
-                <div class="grid-2">
-                    <label>Name<input type="text" required placeholder="Your name"></label>
-                    <label>Email<input type="email" required placeholder="you@example.com"></label>
-                </div>
-                <div class="grid-2">
-                    <label>Topic<select><option>Support</option><option>Styling</option><option>Returns</option></select></label>
-                    <label>Phone<input type="tel" placeholder="(555) 123-4567"></label>
-                </div>
-                <label>Message<textarea rows="4" placeholder="Tell us how we can help"></textarea></label>
-                <button class="btn" type="submit">Send message</button>
-            </form>
-        </section>
-        <aside class="form-card">
-            <h3>Visit or call</h3>
-            <p class="muted">Our stylists and support team respond within one business day.</p>
-            <div class="order-details">
-                <span><strong>Phone:</strong> (555) 987-6543</span>
-                <span><strong>Email:</strong> support@novawear.com</span>
-                <span><strong>Studio:</strong> 45 Market Street, Suite 200</span>
-            </div>
-        </aside>
+        </div>
     </main>
 
-        <!-- Begin shared footer component -->
-        <footer class="footer">
-            <div class="footer-container">
-                <div class="footer-brand">
-                    <h3 class="brand-name">Eterna Luxe</h3>
-                    <p class="brand-tagline">Elegance Refined</p>
+    <!-- Begin shared footer component -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3 class="brand-name">Eterna Luxe</h3>
+                <p class="brand-tagline">Elegance Refined</p>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 class="section-title">Navigate</h4>
+                    <ul class="footer-links">
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#collections">Collections</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
                 </div>
-                <div class="footer-divider"></div>
-                <div class="footer-content">
-                    <div class="footer-section">
-                        <h4 class="section-title">Navigate</h4>
-                        <ul class="footer-links">
-                            <li><a href="#about">About</a></li>
-                            <li><a href="#collections">Collections</a></li>
-                            <li><a href="#contact">Contact</a></li>
-                            <li><a href="#faq">FAQ</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-section">
-                        <h4 class="section-title">Customer Care</h4>
-                        <ul class="footer-links">
-                            <li><a href="#shipping">Shipping</a></li>
-                            <li><a href="#returns">Returns</a></li>
-                            <li><a href="#privacy">Privacy</a></li>
-                            <li><a href="#terms">Terms</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-section">
-                        <h4 class="section-title">Connect</h4>
-                        <div class="contact-info">
-                            <p><a href="mailto:hello@eternaluxe.com" class="contact-link">hello@eternaluxe.com</a></p>
-                            <p><a href="tel:+14155552671" class="contact-link">+1 (415) 555-2671</a></p>
-                        </div>
-                    </div>
+                <div class="footer-section">
+                    <h4 class="section-title">Customer Care</h4>
+                    <ul class="footer-links">
+                        <li><a href="#shipping">Shipping</a></li>
+                        <li><a href="#returns">Returns</a></li>
+                        <li><a href="#privacy">Privacy</a></li>
+                        <li><a href="#terms">Terms</a></li>
+                    </ul>
                 </div>
-                <div class="footer-divider"></div>
-                <div class="footer-social-section">
-                    <div class="social-icons">
-                        <a href="https://www.facebook.com/eternaluxe" class="social-icon facebook" aria-label="Facebook" title="Follow us on Facebook" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 2h-3a6 6 0 0 0-6 6v4h-2v4h2v8h4v-8h3l1-4h-4V8a2 2 0 0 1 2-2h1z"></path>
-                            </svg>
-                        </a>
-                        <a href="https://www.instagram.com/eternaluxe" class="social-icon instagram" aria-label="Instagram" title="Follow us on Instagram" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <circle cx="17.5" cy="6.5" r="1.5"></circle>
-                            </svg>
-                        </a>
-                        <a href="https://www.tiktok.com/@eternaluxe" class="social-icon tiktok" aria-label="TikTok" title="Follow us on TikTok" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.10 1.82 2.90 2.90 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-.4-.05z"></path>
-                            </svg>
-                        </a>
-                        <a href="https://twitter.com/eternaluxe" class="social-icon x" aria-label="X" title="Follow us on X" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L2.066 21.75H-1.265l7.732-8.835L-2.456 2.25h6.823l4.995 6.594L15.642 2.25h3.602zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"></path>
-                            </svg>
-                        </a>
-                        <a href="https://www.youtube.com/@eternaluxe" class="social-icon youtube" aria-label="YouTube" title="Subscribe on YouTube" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
-                            </svg>
-                        </a>
+                <div class="footer-section">
+                    <h4 class="section-title">Connect</h4>
+                    <div class="contact-info">
+                        <p><a href="mailto:hello@eternaluxe.com" class="contact-link">hello@eternaluxe.com</a></p>
+                        <p><a href="tel:+14155552671" class="contact-link">+1 (415) 555-2671</a></p>
                     </div>
-                    <div class="location-divider-wrapper">
-                        <div class="location-divider"></div>
-                        <a href="https://maps.google.com/maps?q=Eterna+Luxe" class="location-icon" aria-label="Find our stores" title="Find our stores on Google Maps" target="_blank" rel="noopener noreferrer">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                        </a>
-                        <div class="location-divider"></div>
-                    </div>
-                </div>
-                <div class="footer-divider"></div>
-                <div class="footer-bottom">
-                    <p class="copyright">&copy; 2025 Eterna Luxe. All rights reserved.</p>
-                    <p class="footer-credit">Crafted with elegance</p>
                 </div>
             </div>
-        </footer>
-        <!-- End shared footer component -->
+            <div class="footer-divider"></div>
+            <div class="footer-social-section">
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/eternaluxe" class="social-icon facebook" aria-label="Facebook" title="Follow us on Facebook" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 2h-3a6 6 0 0 0-6 6v4h-2v4h2v8h4v-8h3l1-4h-4V8a2 2 0 0 1 2-2h1z"></path>
+                        </svg>
+                    </a>
+                    <a href="https://www.instagram.com/eternaluxe" class="social-icon instagram" aria-label="Instagram" title="Follow us on Instagram" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <circle cx="17.5" cy="6.5" r="1.5"></circle>
+                        </svg>
+                    </a>
+                    <a href="https://www.tiktok.com/@eternaluxe" class="social-icon tiktok" aria-label="TikTok" title="Follow us on TikTok" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.10 1.82 2.90 2.90 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-.4-.05z"></path>
+                        </svg>
+                    </a>
+                    <a href="https://twitter.com/eternaluxe" class="social-icon x" aria-label="X" title="Follow us on X" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.657l-5.214-6.817L2.066 21.75H-1.265l7.732-8.835L-2.456 2.25h6.823l4.995 6.594L15.642 2.25h3.602zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"></path>
+                        </svg>
+                    </a>
+                    <a href="https://www.youtube.com/@eternaluxe" class="social-icon youtube" aria-label="YouTube" title="Subscribe on YouTube" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="location-divider-wrapper">
+                    <div class="location-divider"></div>
+                    <a href="https://maps.google.com/maps?q=Eterna+Luxe" class="location-icon" aria-label="Find our stores" title="Find our stores on Google Maps" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </a>
+                    <div class="location-divider"></div>
+                </div>
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+                <p class="copyright">&copy; 2025 Eterna Luxe. All rights reserved.</p>
+                <p class="footer-credit">Crafted with elegance</p>
+            </div>
+        </div>
+    </footer>
+    <!-- End shared footer component -->
 
     <script src="../js/data.js"></script>
     <script src="../js/main.js"></script>
