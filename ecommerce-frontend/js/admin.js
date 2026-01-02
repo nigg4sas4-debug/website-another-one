@@ -475,6 +475,16 @@
                 .flatMap((variation) => variation.sizes || [])
                 .reduce((sum, size) => sum + Number(size.stock || 0), 0);
 
+            let stockStatus = 'In Stock';
+            let stockClass = 'pill-success';
+            if (totalStock === 0) {
+                stockStatus = 'Out of Stock';
+                stockClass = 'pill-danger';
+            } else if (totalStock < 10) {
+                stockStatus = 'Low Stock';
+                stockClass = 'pill-warning';
+            }
+
             const variationsHtml = (product.variations || [])
                 .map((variation) => {
                     const sizesHtml = (variation.sizes || [])
@@ -505,20 +515,22 @@
                 .join("");
 
             return `
-                <article class="inventory-card" data-product-id="${product.id}">
-                    <header class="inventory-card__head">
-                        <div>
+                <article class="inventory-item" data-product-id="${product.id}">
+                    <div class="inventory-summary" data-toggle-details>
+                        <div class="summary-info">
                             <strong>${product.name}</strong>
-                            <p class="muted">${product.category || "Uncategorized"}</p>
+                            <span class="muted text-sm">${product.category || "Uncategorized"}</span>
                         </div>
-                        <div class="inventory-card__meta">
-                            <span class="pill">Total stock: ${totalStock}</span>
-                            <span class="price">${window.getPriceRange?.(product)}</span>
+                        <div class="summary-stats">
+                            <span class="pill ${stockClass}">${stockStatus} (${totalStock})</span>
+                            <span class="toggle-icon">▼</span>
                         </div>
-                    </header>
-                    <div class="inventory-variations">${variationsHtml}</div>
-                    <div class="inventory-card__actions">
-                        <button type="button" class="btn ghost" data-update-product>Update stock</button>
+                    </div>
+                    <div class="inventory-details hidden">
+                        <div class="inventory-variations">${variationsHtml}</div>
+                        <div class="inventory-card__actions">
+                            <button type="button" class="btn ghost" data-update-product>Update stock</button>
+                        </div>
                     </div>
                 </article>
             `;
@@ -666,6 +678,21 @@
 
     inventoryGrid?.addEventListener("click", async (event) => {
         const target = event.target;
+        
+        // Handle toggle
+        const summary = target.closest('[data-toggle-details]');
+        if (summary) {
+            const item = summary.closest('.inventory-item');
+            const details = item.querySelector('.inventory-details');
+            const icon = summary.querySelector('.toggle-icon');
+            
+            const isHidden = details.classList.contains('hidden');
+            details.classList.toggle('hidden');
+            // Simple rotation or change
+            icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            return; 
+        }
+
         if (!(target instanceof HTMLElement)) return;
         const button = target.closest("[data-update-product]");
         if (!button) return;
